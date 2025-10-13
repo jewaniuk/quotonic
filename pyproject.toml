@@ -1,0 +1,80 @@
+[project]
+name = 'quotonic'
+version = '0.0.2'
+requires-python = '>=3.9,<4.0'
+description = 'A platform for performing efficient simulations in the quantum photonic domain.'
+authors = [
+    {name = 'Jacob Ewaniuk', email = 'jacob.ewaniuk@queensu.ca'}
+]
+maintainers = [
+    {name = 'Jacob Ewaniuk', email = 'jacob.ewaniuk@queensu.ca'}
+]
+readme = 'README.md'
+license = {file = 'LICENSE'}
+keywords = ['quantum', 'photonics', 'optics', 'neural networks', 'machine learning', 'light-matter interactions']
+dependencies = [
+    'numpy >= 1.23.0',
+    'jax >= 0.4.1',
+    'optax >= 0.1.8'
+]
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: MIT License',
+    'Natural Language :: English',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Topic :: Scientific/Engineering :: Artificial Intelligence',
+    'Topic :: Scientific/Engineering :: Physics'
+]
+
+[project.urls]
+repository = 'https://github.com/QNLQueens/quotonic'
+documentation = 'https://QNLQueens.github.io/quotonic/'
+
+[project.optional-dependencies]
+dev = [
+    'build >= 0.10.0',
+    'mypy >= 0.981',
+    'pre-commit >= 2.20.0',
+    'pytest >= 7.2.0',
+    'pytest-cov >= 4.0.0',
+    'flake8 >= 6.0.0', 
+    'tox >= 3.25.1',
+    'mkdocs >= 1.4.2',
+    'mkdocs-material >= 8.5.10',
+    'mkdocstrings >= 0.19.0',
+    'mkdocstrings-python >= 0.8.3',
+    'genbadge[coverage,flake8] >= 1.1.0'
+]
+
+[tool.black]
+line-length = 150
+include = '\.pyi?$'
+target-version = ['py310']
+fast = true
+
+[tool.isort]
+profile = 'black'
+
+[tool.pytest.ini_options]
+addopts = '--cov=quotonic'
+testpaths = ['tests']
+
+[tool.mypy]
+files = ['src']
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_any_unimported = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_context = true
+
+[[tool.mypy.overrides]]
+module = "quotonic.trainer"
+ignore_errors = true

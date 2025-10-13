@@ -1,0 +1,69 @@
+site_name: quotonic
+repo_url: https://github.com/QNLQueens/quotonic
+site_url: ""
+site_description: A platform for performing efficient simulations in the quantum photonic domain.
+site_author: Jacob Ewaniuk
+edit_uri: edit/main/docs/
+repo_name: QNLQueens/quotonic
+copyright: Maintained by <a href="https://www.linkedin.com/in/jacobewaniuk/">Jacob Ewaniuk</a>.
+use_directory_urls: false
+
+nav:
+  - Home: index.md
+  - Fock: fock.md
+  - Clements: clements.md
+  - Aaronson & Arkhipov: aa.md
+  - Nonlinearities: nl.md
+  - Quantum Photonic Neural Network: qpnn.md
+  - Trainer: trainer.md
+  - Training Sets: training_sets.md
+  - Permanents: perm.md
+  - Logic: logic.md
+  - Utilities: utils.md
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          setup_commands:
+            - import sys
+            - sys.path.append('../')
+theme:
+  name: material
+  feature:
+    tabs: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/QNLQueens/quotonic
+    - icon: fontawesome/brands/python
+      link: https://pypi.com/project/quotonic
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
