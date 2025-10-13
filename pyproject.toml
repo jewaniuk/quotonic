@@ -1,8 +1,8 @@
 [project]
 name = 'quotonic'
-version = '0.0.2'
+version = '1.0.0'
 requires-python = '>=3.9,<4.0'
-description = 'A platform for performing efficient simulations in the quantum photonic domain.'
+description = 'A platform for performing efficient simulations of nonlinear quantum photonic circuits.'
 authors = [
     {name = 'Jacob Ewaniuk', email = 'jacob.ewaniuk@queensu.ca'}
 ]
@@ -13,9 +13,9 @@ readme = 'README.md'
 license = {file = 'LICENSE'}
 keywords = ['quantum', 'photonics', 'optics', 'neural networks', 'machine learning', 'light-matter interactions']
 dependencies = [
-    'numpy >= 1.23.0',
-    'jax >= 0.4.1',
-    'optax >= 0.1.8'
+    'numpy >= 2.0.0',
+    'jax >= 0.6.0',
+    'optax >= 0.2.0'
 ]
 classifiers = [
     'Development Status :: 3 - Alpha',
@@ -24,17 +24,17 @@ classifiers = [
     'Natural Language :: English',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Topic :: Scientific/Engineering :: Artificial Intelligence',
     'Topic :: Scientific/Engineering :: Physics'
 ]
 
 [project.urls]
-repository = 'https://github.com/QNLQueens/quotonic'
-documentation = 'https://QNLQueens.github.io/quotonic/'
+repository = 'https://github.com/jewaniuk/quotonic'
+documentation = 'https://jewaniuk.github.io/quotonic/'
 
 [project.optional-dependencies]
 dev = [
