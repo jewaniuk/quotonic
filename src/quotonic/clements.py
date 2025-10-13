@@ -158,7 +158,9 @@ class Mesh:
             dc_offdiag_up = jnp.roll(
                 jnp.diag(
                     jnp.pad(
-                        jnp.dstack((1j * jnp.sqrt(1.0 - t_dc_col[0]), jnp.zeros(m_2 - m0 * even, dtype=complex))).flatten(),
+                        jnp.dstack(
+                            (1j * jnp.sqrt(1.0 - t_dc_col[0]), jnp.zeros(m_2 - m0 * even, dtype=complex))
+                        ).flatten(),
                         (m0, (m0 + odd) % 2),
                         "constant",
                         constant_values=(0.0, 0.0),
@@ -169,7 +171,9 @@ class Mesh:
             dc_offdiag_down = jnp.roll(
                 jnp.diag(
                     jnp.pad(
-                        jnp.dstack((jnp.zeros(m_2 - m0 * even, dtype=complex), 1j * jnp.sqrt(1.0 - t_dc_col[0]))).flatten(),
+                        jnp.dstack(
+                            (jnp.zeros(m_2 - m0 * even, dtype=complex), 1j * jnp.sqrt(1.0 - t_dc_col[0]))
+                        ).flatten(),
                         (m0, (m0 + odd) % 2),
                         "constant",
                         constant_values=(0.0, 0.0),
@@ -190,7 +194,9 @@ class Mesh:
             dc_offdiag_up = jnp.roll(
                 jnp.diag(
                     jnp.pad(
-                        jnp.dstack((1j * jnp.sqrt(1.0 - t_dc_col[1]), jnp.zeros(m_2 - m0 * even, dtype=complex))).flatten(),
+                        jnp.dstack(
+                            (1j * jnp.sqrt(1.0 - t_dc_col[1]), jnp.zeros(m_2 - m0 * even, dtype=complex))
+                        ).flatten(),
                         (m0, (m0 + odd) % 2),
                         "constant",
                         constant_values=(0.0, 0.0),
@@ -201,7 +207,9 @@ class Mesh:
             dc_offdiag_down = jnp.roll(
                 jnp.diag(
                     jnp.pad(
-                        jnp.dstack((jnp.zeros(m_2 - m0 * even, dtype=complex), 1j * jnp.sqrt(1.0 - t_dc_col[1]))).flatten(),
+                        jnp.dstack(
+                            (jnp.zeros(m_2 - m0 * even, dtype=complex), 1j * jnp.sqrt(1.0 - t_dc_col[1]))
+                        ).flatten(),
                         (m0, (m0 + odd) % 2),
                         "constant",
                         constant_values=(0.0, 0.0),
@@ -214,7 +222,9 @@ class Mesh:
             # construct matrices that describe the transformations enacted by full columns of phi & 2theta phase shifters respectively
             ps_phi = jnp.diag(
                 jnp.pad(
-                    jnp.dstack((jnp.exp(1j * phi_col), jnp.ones(m_2 - m0 * even, dtype=complex))).reshape(self.m - odd - 2 * m0 * even),
+                    jnp.dstack((jnp.exp(1j * phi_col), jnp.ones(m_2 - m0 * even, dtype=complex))).reshape(
+                        self.m - odd - 2 * m0 * even
+                    ),
                     (m0, (m0 + odd) % 2),
                     "constant",
                     constant_values=(1.0, 1.0),
@@ -222,7 +232,9 @@ class Mesh:
             )
             ps_2theta = jnp.diag(
                 jnp.pad(
-                    jnp.dstack((jnp.exp(2j * theta_col), jnp.ones(m_2 - m0 * even, dtype=complex))).reshape(self.m - odd - 2 * m0 * even),
+                    jnp.dstack((jnp.exp(2j * theta_col), jnp.ones(m_2 - m0 * even, dtype=complex))).reshape(
+                        self.m - odd - 2 * m0 * even
+                    ),
                     (m0, (m0 + odd) % 2),
                     "constant",
                     constant_values=(1.0, 1.0),
@@ -277,8 +289,14 @@ class Mesh:
                     q = i - j + 1
 
                     # compute phi, theta to 0 out matrix element
-                    phi = np.pi if U[self.m - j - 1, i - j + 1] == 0 else np.pi + np.angle(U[self.m - j - 1, i - j] / U[self.m - j - 1, i - j + 1])
-                    theta = np.pi / 2 - np.arctan2(np.abs(U[self.m - j - 1, i - j]), np.abs(U[self.m - j - 1, i - j + 1]))
+                    phi = (
+                        np.pi
+                        if U[self.m - j - 1, i - j + 1] == 0
+                        else np.pi + np.angle(U[self.m - j - 1, i - j] / U[self.m - j - 1, i - j + 1])
+                    )
+                    theta = np.pi / 2 - np.arctan2(
+                        np.abs(U[self.m - j - 1, i - j]), np.abs(U[self.m - j - 1, i - j + 1])
+                    )
 
                     # from phi, theta, construct T_{p,q}^{-1}, then right-multiply
                     T_right = np.eye(self.m, dtype=complex)
@@ -296,7 +314,11 @@ class Mesh:
                     q = self.m + j - i - 1
 
                     # compute phi, theta to 0 out matrix element
-                    phi = np.pi if U[self.m + j - i - 2, j] == 0 else np.pi + np.angle(-U[self.m + j - i - 1, j] / U[self.m + j - i - 2, j])
+                    phi = (
+                        np.pi
+                        if U[self.m + j - i - 2, j] == 0
+                        else np.pi + np.angle(-U[self.m + j - i - 1, j] / U[self.m + j - i - 2, j])
+                    )
                     theta = np.pi / 2 - np.arctan2(np.abs(U[self.m + j - i - 1, j]), np.abs(U[self.m + j - i - 2, j]))
 
                     # from phi, theta, construct T_{p,q}, then left-multiply

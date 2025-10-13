@@ -57,4 +57,7 @@ def test_comp_indices_from_asymm_fock():
     symm_mode_basis = fock.build_symm_mode_basis(n, m)
     ancillary_modes = np.array([0, 5])
     result = np.array([[9, 19], [10, 25], [15, 20], [16, 26]])
-    assert np.allclose(utils.comp_indices_from_asymm_fock(asymm_basis, symm_basis, symm_mode_basis, ancillary_modes=ancillary_modes), result)
+    assert np.allclose(
+        utils.comp_indices_from_asymm_fock(asymm_basis, symm_basis, symm_mode_basis, ancillary_modes=ancillary_modes),
+        result,
+    )

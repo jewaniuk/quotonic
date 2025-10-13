@@ -719,4 +719,6 @@ def test_build_photon_mp():
         ],
         dtype=complex,
     )
-    assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2, basis_type="asymmetric", burnout_map=burnout_map), result)
+    assert np.allclose(
+        nl.build_photon_mp(n, m, varphi1, varphi2, basis_type="asymmetric", burnout_map=burnout_map), result
+    )

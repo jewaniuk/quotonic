@@ -18,7 +18,9 @@ def gaussian_t(t: np.ndarray, t0: float, sigt: float) -> np.ndarray:
     Returns:
         Gaussian wavefunction in the temporal domain, taking the same shape as the domain itself
     """
-    alph: npt.NDArray[np.complex128] = ((2 / (np.pi * (sigt**2))) ** 0.25) * np.exp(-((t - t0) ** 2) / (sigt**2), dtype=complex)
+    alph: npt.NDArray[np.complex128] = ((2 / (np.pi * (sigt**2))) ** 0.25) * np.exp(
+        -((t - t0) ** 2) / (sigt**2), dtype=complex
+    )
     return alph
 
 
@@ -33,5 +35,7 @@ def gaussian_w(w: np.ndarray, w0: float, sigw: float) -> np.ndarray:
     Returns:
         Gaussian wavefunction in the frequency domain, taking the same shape as the domain itself
     """
-    alph: npt.NDArray[np.complex128] = ((2 * np.pi * (sigw**2)) ** -0.25) * np.exp(-0.25 * ((w - w0) ** 2) / (sigw**2), dtype=complex)
+    alph: npt.NDArray[np.complex128] = ((2 * np.pi * (sigw**2)) ** -0.25) * np.exp(
+        -0.25 * ((w - w0) ** 2) / (sigw**2), dtype=complex
+    )
     return alph

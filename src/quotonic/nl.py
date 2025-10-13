@@ -10,7 +10,11 @@ from quotonic.fock import build_asymm_basis, build_symm_basis
 
 
 def build_kerr(
-    n: int, m: int, varphi: Union[float, np.ndarray], basis_type: str = "symmetric", burnout_map: Optional[np.ndarray] = None
+    n: int,
+    m: int,
+    varphi: Union[float, np.ndarray],
+    basis_type: str = "symmetric",
+    burnout_map: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Construct the diagonal nonlinear Kerr unitary in the relevant Fock basis.
 
@@ -64,7 +68,12 @@ def build_kerr(
 
 
 def build_photon_mp(
-    n: int, m: int, varphi1: float, varphi2: float, basis_type: str = "symmetric", burnout_map: Optional[np.ndarray] = None
+    n: int,
+    m: int,
+    varphi1: float,
+    varphi2: float,
+    basis_type: str = "symmetric",
+    burnout_map: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Construct the diagonal nonlinear $\\Lambda$-type 3LS photon $\\mp$ unitary in the relevant Fock basis.
 

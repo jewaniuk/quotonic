@@ -160,9 +160,13 @@ def JitterBSA(
     basis = build_asymm_basis(n, m)
     N = basis.shape[0]
     ancillary_modes = (
-        np.hstack((np.arange(0, num_ancillary_modes // 2), np.arange(num_ancillary_modes + 4, m)), dtype=int) if num_ancillary_modes > 0 else None
+        np.hstack((np.arange(0, num_ancillary_modes // 2), np.arange(num_ancillary_modes + 4, m)), dtype=int)
+        if num_ancillary_modes > 0
+        else None
     )
-    comp_inds = comp_indices_from_asymm_fock(basis, build_symm_basis(n, m), build_symm_mode_basis(n, m), ancillary_modes=ancillary_modes)
+    comp_inds = comp_indices_from_asymm_fock(
+        basis, build_symm_basis(n, m), build_symm_mode_basis(n, m), ancillary_modes=ancillary_modes
+    )
 
     # construct the input states
     psi_in = np.zeros((K, N, Nt, Nt), dtype=complex)

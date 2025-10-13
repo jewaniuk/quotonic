@@ -50,7 +50,9 @@ def calc_perm_ryser(U: jnp.ndarray) -> DTypeLike:
     sign = jnp.resize(jnp.array([-1, 1], dtype=jnp.int16), two_to_n - 1)
 
     # calculate permanent by vectorizing Ryser's algorithm
-    perm: DTypeLike = jnp.sum(sign * jnp.prod(jnp.cumsum(vmap(lambda ind, direc: U[ind] * direc)(gray_diff_ind, direction), axis=0), axis=1))
+    perm: DTypeLike = jnp.sum(
+        sign * jnp.prod(jnp.cumsum(vmap(lambda ind, direc: U[ind] * direc)(gray_diff_ind, direction), axis=0), axis=1)
+    )
     return perm
 
 
@@ -236,7 +238,12 @@ class Permanent:
         Returns:
             Permanent of the given square matrix
         """
-        return jnp.sum(self.sign * jnp.prod(jnp.cumsum(vmap(lambda ind, direc: U[ind] * direc)(self.gray_diff_ind, self.direction), axis=0), axis=1))
+        return jnp.sum(
+            self.sign
+            * jnp.prod(
+                jnp.cumsum(vmap(lambda ind, direc: U[ind] * direc)(self.gray_diff_ind, self.direction), axis=0), axis=1
+            )
+        )
 
 
 class EmptyPermanent:

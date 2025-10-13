@@ -54,7 +54,9 @@ def CNOT(control: int = 0, target: int = 1, n: int = 2) -> np.ndarray:
     Returns:
         Matrix representation of a CNOT gate between the control and target qubits, as a $2^n\\times 2^n$ array
     """
-    assert (n > control) and (n > target), "Check that you are indexing correctly and that you are passing the correct number of qubits"
+    assert (n > control) and (
+        n > target
+    ), "Check that you are indexing correctly and that you are passing the correct number of qubits"
     assert control != target, "Control and target qubits should be different"
 
     # define relevant single-qubit gates
@@ -96,7 +98,9 @@ def CZ(control: int = 0, target: int = 1, n: int = 2) -> np.ndarray:
     Returns:
         Matrix representation of a CZ gate between the control and target qubits, as a $2^n\\times 2^n$ array
     """
-    assert (n > control) and (n > target), "Check that you are indexing correctly and that you are passing the correct number of qubits"
+    assert (n > control) and (
+        n > target
+    ), "Check that you are indexing correctly and that you are passing the correct number of qubits"
     assert control != target, "Control and target qubits should be different"
 
     # define relevant single-qubit gates

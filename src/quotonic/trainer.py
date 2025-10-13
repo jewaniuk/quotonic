@@ -187,7 +187,9 @@ class IdealTrainer(Trainer):
 
             # store the results from this trial
             results["F"][trial] = F
-            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [np.asarray(Theta[i]) for i in range(3)]
+            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
+                np.asarray(Theta[i]) for i in range(3)
+            ]
 
             print("")
 
@@ -326,13 +328,17 @@ class ImperfectTrainer(Trainer):
 
             # compute performance measures of the trained QPNN
             _, Fc, rate = self.qpnn.calc_performance_measures(*Theta)
-            print(f"COMPLETE! \t Cost: {C:.4e} \t Unconditional Fidelity: {Fu[-1]:.4g} \t Conditional Fidelity: {Fc:.4g} \t Rate: {rate:.4g}")
+            print(
+                f"COMPLETE! \t Cost: {C:.4e} \t Unconditional Fidelity: {Fu[-1]:.4g} \t Conditional Fidelity: {Fc:.4g} \t Rate: {rate:.4g}"
+            )
 
             # store the results from this trial
             results["Fu"][trial] = Fu
             results["Fc"][trial] = Fc
             results["rate"][trial] = rate
-            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [np.asarray(Theta[i]) for i in range(3)]
+            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
+                np.asarray(Theta[i]) for i in range(3)
+            ]
             for i in range(self.qpnn.L):
                 results["ell_mzi"][trial][i] = self.qpnn.meshes[i].ell_mzi
                 results["ell_ps"][trial][i] = self.qpnn.meshes[i].ell_ps
@@ -477,13 +483,17 @@ class MinimalTrainer(Trainer):
 
             # compute performance measures of the trained QPNN
             _, Fc, rate = self.qpnn.calc_performance_measures(*Theta)
-            print(f"COMPLETE! \t Cost: {C:.4e} \t Unconditional Fidelity: {Fu[-1]:.4g} \t Conditional Fidelity: {Fc:.4g} \t Rate: {rate:.4g}")
+            print(
+                f"COMPLETE! \t Cost: {C:.4e} \t Unconditional Fidelity: {Fu[-1]:.4g} \t Conditional Fidelity: {Fc:.4g} \t Rate: {rate:.4g}"
+            )
 
             # store the results from this trial
             results["Fu"][trial] = Fu
             results["Fc"][trial] = Fc
             results["rate"][trial] = rate
-            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [np.asarray(Theta[i]) for i in range(3)]
+            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
+                np.asarray(Theta[i]) for i in range(3)
+            ]
             results["varphi"][trial] = self.qpnn.varphis
             for i in range(self.qpnn.L):
                 results["ell_mzi"][trial][i] = self.qpnn.meshes[i].ell_mzi
@@ -613,11 +623,15 @@ class JitterTrainer(Trainer):
                 Fub[epoch] = 1 - C
 
                 if epoch % self.print_every == 0:
-                    print(f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Bin Fidelity: {Fub[epoch]:.4g} \t Wavepacket Fidelity: {Fuw[epoch]:.4g}")
+                    print(
+                        f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Bin Fidelity: {Fub[epoch]:.4g} \t Wavepacket Fidelity: {Fuw[epoch]:.4g}"
+                    )
 
             # compute performance measures of the trained QPNN
             _, _, Fcw, Fcb, rate = self.qpnn.calc_performance_measures(*Theta)
-            print(f"COMPLETE! \t Cost: {C:.4e} \t Fub: {Fub[-1]:.4g} \t Fuw: {Fuw[-1]:.4g} \t Fcb: {Fcb:.4g} \t Fcw: {Fcw:.4g} \t Rate: {rate:.4g}")
+            print(
+                f"COMPLETE! \t Cost: {C:.4e} \t Fub: {Fub[-1]:.4g} \t Fuw: {Fuw[-1]:.4g} \t Fcb: {Fcb:.4g} \t Fcw: {Fcw:.4g} \t Rate: {rate:.4g}"
+            )
 
             # store the results from this trial
             results["Fub"][trial] = Fub
@@ -625,8 +639,12 @@ class JitterTrainer(Trainer):
             results["Fcb"][trial] = Fcb
             results["Fcw"][trial] = Fcw
             results["rate"][trial] = rate
-            results["phi0"][trial], results["theta0"][trial], results["delta0"][trial] = [np.asarray(Theta0[i]) for i in range(3)]
-            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [np.asarray(Theta[i]) for i in range(3)]
+            results["phi0"][trial], results["theta0"][trial], results["delta0"][trial] = [
+                np.asarray(Theta0[i]) for i in range(3)
+            ]
+            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
+                np.asarray(Theta[i]) for i in range(3)
+            ]
 
             print("")
 
@@ -775,7 +793,9 @@ class TreeTrainer(Trainer):
             results["Fuu"][trial] = Fuu
             results["Fc"][trial] = Fc
             results["rate"][trial] = rate
-            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [np.asarray(Theta[i]) for i in range(3)]
+            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
+                np.asarray(Theta[i]) for i in range(3)
+            ]
             for i in range(self.qpnn.L):
                 results["ell_mzi"][trial][i] = self.qpnn.meshes[i].ell_mzi
                 results["ell_ps"][trial][i] = self.qpnn.meshes[i].ell_ps
@@ -925,7 +945,9 @@ class TreeTrainerExtended(Trainer):
             results["Fu"][trial] = Fu
             results["Fc"][trial] = Fc
             results["rate"][trial] = rate
-            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [np.asarray(Theta[i]) for i in range(3)]
+            results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
+                np.asarray(Theta[i]) for i in range(3)
+            ]
             for i in range(self.qpnn.L):
                 results["ell_mzi"][trial][i] = self.qpnn.meshes[i].ell_mzi
                 results["ell_ps"][trial][i] = self.qpnn.meshes[i].ell_ps

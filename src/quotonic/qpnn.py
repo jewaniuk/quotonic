@@ -39,7 +39,9 @@ class QPNN:
         """
 
         # check that basis_type is valid
-        assert (basis_type == "symmetric") or (basis_type == "asymmetric"), "Basis type must be 'symmetric' or 'asymmetric'"
+        assert (basis_type == "symmetric") or (
+            basis_type == "asymmetric"
+        ), "Basis type must be 'symmetric' or 'asymmetric'"
 
         # store the provided properties of the QPNN, compute others
         self.n = n
@@ -271,7 +273,9 @@ class ImperfectQPNN(QPNN):
                 self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
                 self.m,
             )
-            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape((2, self.m * (self.m - 1) // 2))
+            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
+                (2, self.m * (self.m - 1) // 2)
+            )
 
             self.meshes[i].ell_mzi = jnp.asarray(ells_mzi)
             self.meshes[i].ell_ps = jnp.asarray(ells_ps)
@@ -291,7 +295,9 @@ class ImperfectQPNN(QPNN):
         """
 
         # encode the single-photon unitary matrices for each linear layer in the Clements configuration
-        single_photon_Us = jnp.array([self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex)
+        single_photon_Us = jnp.array(
+            [self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex
+        )
 
         # perform the multi-photon unitary transformations for each linear layer
         multi_photon_Us = vmap(self.transformer.transform)(single_photon_Us)
@@ -483,7 +489,9 @@ class MinimalQPNN(QPNN):
                 self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
                 self.m,
             )
-            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape((2, self.m * (self.m - 1) // 2))
+            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
+                (2, self.m * (self.m - 1) // 2)
+            )
 
             self.meshes[i].ell_mzi = jnp.asarray(ells_mzi)
             self.meshes[i].ell_ps = jnp.asarray(ells_ps)
@@ -503,7 +511,9 @@ class MinimalQPNN(QPNN):
         """
 
         # encode the single-photon unitary matrices for each linear layer in the Clements configuration
-        single_photon_Us = jnp.array([self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex)
+        single_photon_Us = jnp.array(
+            [self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex
+        )
 
         # perform the multi-photon unitary transformations for each linear layer
         multi_photon_Us = vmap(self.transformer.transform)(single_photon_Us)
@@ -643,7 +653,9 @@ class JitterQPNN(QPNN):
         # instantiate a Clements mesh to act as the pathway to encoding the linear layers, with imperfect directional coupler splitting ratios as specified
         self.mesh = Mesh(
             m,
-            t_dc=np.vstack((t_dc[0] * np.ones(m * (m - 1) // 2, dtype=float), t_dc[1] * np.ones(m * (m - 1) // 2, dtype=float))),
+            t_dc=np.vstack(
+                (t_dc[0] * np.ones(m * (m - 1) // 2, dtype=float), t_dc[1] * np.ones(m * (m - 1) // 2, dtype=float))
+            ),
         )
 
         # construct the loss matrices for the MZI, output phase shifter, and input/output switches used to realize a time-bin mesh
@@ -666,7 +678,9 @@ class JitterQPNN(QPNN):
         self.kerr = jnp.asarray(build_kerr(n, m, varphi, basis_type="asymmetric"))
 
         # prepare the training set attributes whether one was provided or not
-        self.training_set = training_set if training_set is not None else (jnp.array(()), jnp.array(()), jnp.array(()), jnp.array(()))
+        self.training_set = (
+            training_set if training_set is not None else (jnp.array(()), jnp.array(()), jnp.array(()), jnp.array(()))
+        )
 
         # compute overhead for conditional fidelity and logical rate calculations
         self.comp_indices = jnp.asarray(comp_indices).flatten() if comp_indices is not None else jnp.array(())
@@ -776,9 +790,10 @@ class JitterQPNN(QPNN):
         psi_out = vmap(lambda psi: jnp.tensordot(S, psi, axes=1))(self.psi_in)
 
         # compute the unconditional wavepacket fidelity by first computing it for all K input-target pairs, then averaging
-        Fuws = vmap(lambda psit, psio: jnp.abs(jnp.sum(jnp.trapezoid(jnp.trapezoid(jnp.conj(psit) * psio, self.t), self.t))) ** 2)(
-            self.psi_targ, psi_out
-        )
+        Fuws = vmap(
+            lambda psit, psio: jnp.abs(jnp.sum(jnp.trapezoid(jnp.trapezoid(jnp.conj(psit) * psio, self.t), self.t)))
+            ** 2
+        )(self.psi_targ, psi_out)
         Fuw = jnp.mean(Fuws)
 
         @vmap
@@ -826,9 +841,10 @@ class JitterQPNN(QPNN):
         psi_out = vmap(lambda psi: jnp.tensordot(S, psi, axes=1))(self.psi_in)
 
         # compute the wavepacket fidelity by first computing it for all K input-target pairs, then averaging
-        Fuws = vmap(lambda psit, psio: jnp.abs(jnp.sum(jnp.trapezoid(jnp.trapezoid(jnp.conj(psit) * psio, self.t), self.t))) ** 2)(
-            self.psi_targ, psi_out
-        )
+        Fuws = vmap(
+            lambda psit, psio: jnp.abs(jnp.sum(jnp.trapezoid(jnp.trapezoid(jnp.conj(psit) * psio, self.t), self.t)))
+            ** 2
+        )(self.psi_targ, psi_out)
         Fuw = jnp.mean(Fuws)
 
         @vmap
@@ -863,7 +879,9 @@ class JitterQPNN(QPNN):
             """
 
             # compute the probabilities of the photons being situated in each of the computational basis states of the asymmetric Fock basis, then sum
-            probs = vmap(lambda ind: jnp.trapezoid(jnp.trapezoid(jnp.abs(psio[ind]) ** 2, self.t), self.t))(self.comp_indices)
+            probs = vmap(lambda ind: jnp.trapezoid(jnp.trapezoid(jnp.abs(psio[ind]) ** 2, self.t), self.t))(
+                self.comp_indices
+            )
             return jnp.sum(probs)  # type: ignore
 
         # compute the logical rates for each input-target pair, then average
@@ -951,7 +969,9 @@ class TreeQPNN(QPNN):
 
         # prepare the training set attributes whether they were provided or not
         self.training_set = training_set if training_set is not None else (jnp.array(()), jnp.array(()))
-        self.training_set_route = training_set_route if training_set_route is not None else (jnp.array(()), jnp.array(()))
+        self.training_set_route = (
+            training_set_route if training_set_route is not None else (jnp.array(()), jnp.array(()))
+        )
 
         # compute overhead for conditional fidelity and logical rate calculations
         self.comp_indices = jnp.asarray(comp_indices_from_symm_fock(build_symm_basis(n, m)))
@@ -1014,7 +1034,9 @@ class TreeQPNN(QPNN):
                 self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
                 self.m,
             )
-            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape((2, self.m * (self.m - 1) // 2))
+            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
+                (2, self.m * (self.m - 1) // 2)
+            )
 
             if new:
                 self.meshes.append(Mesh(self.m, ells_mzi, ells_ps, ts_dc))
@@ -1038,7 +1060,9 @@ class TreeQPNN(QPNN):
         """
 
         # encode the single-photon unitary matrices for each linear layer in the Clements configuration
-        single_photon_Us = jnp.array([self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex)
+        single_photon_Us = jnp.array(
+            [self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex
+        )
 
         # perform the multi-photon unitary transformations for each linear layer
         multi_photon_Us = vmap(self.transformer.transform)(single_photon_Us)
@@ -1079,7 +1103,9 @@ class TreeQPNN(QPNN):
 
         # compute the unconditional fidelity by first computing it for all K + K_route input-target pairs, then averaging
         Fus = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(self.psi_targ, psi_out)
-        Fus_route = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(self.psi_targ_route, psi_out_route)
+        Fus_route = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(
+            self.psi_targ_route, psi_out_route
+        )
         Fu = jnp.mean(jnp.hstack((Fus, Fus_route)))
 
         return Fu
@@ -1256,7 +1282,9 @@ class TreeQPNNExtended(QPNN):
                 self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
                 self.m,
             )
-            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape((2, self.m * (self.m - 1) // 2))
+            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
+                (2, self.m * (self.m - 1) // 2)
+            )
 
             self.meshes[i].ell_mzi = jnp.asarray(ells_mzi)
             self.meshes[i].ell_ps = jnp.asarray(ells_ps)
@@ -1276,7 +1304,9 @@ class TreeQPNNExtended(QPNN):
         """
 
         # encode the single-photon unitary matrices for each linear layer in the Clements configuration
-        single_photon_Us = jnp.array([self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex)
+        single_photon_Us = jnp.array(
+            [self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex
+        )
 
         def n_photon_S(transformer: SymmetricTransformer, nl: jnp.ndarray, N: int) -> jnp.ndarray:
             # perform the multi-photon unitary transformations for each linear layer

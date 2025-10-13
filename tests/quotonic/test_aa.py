@@ -296,7 +296,9 @@ def test_asymmetric_transform():
     n = 1
     assert np.allclose(np.asarray(aa.asymmetric_transform(U, n)), U, atol=1e-4)
     n = 2
-    result = np.array([[0.5, 0.5, 0.5, 0.5], [0.5, -0.5, 0.5, -0.5], [0.5, 0.5, -0.5, -0.5], [0.5, -0.5, -0.5, 0.5]], dtype=complex)
+    result = np.array(
+        [[0.5, 0.5, 0.5, 0.5], [0.5, -0.5, 0.5, -0.5], [0.5, 0.5, -0.5, -0.5], [0.5, -0.5, -0.5, 0.5]], dtype=complex
+    )
     assert np.allclose(np.asarray(aa.asymmetric_transform(U, n)), result, atol=1e-4)
     n = 3
     result = np.array(

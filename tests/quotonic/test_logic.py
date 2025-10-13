@@ -18,22 +18,30 @@ def test_build_comp_basis():
 
 
 def test_H():
-    assert np.allclose(logic.H() @ np.array([1, 0], dtype=complex), np.array([0.70710678 + 0.0j, 0.70710678 + 0.0j], dtype=complex))
+    assert np.allclose(
+        logic.H() @ np.array([1, 0], dtype=complex), np.array([0.70710678 + 0.0j, 0.70710678 + 0.0j], dtype=complex)
+    )
 
 
 def test_CNOT():
     assert np.allclose(
-        logic.CNOT() @ np.array([0, 0, 0, 1], dtype=complex), np.array([0.0 + 0.0j, 0.0 + 0.0j, 1.0 + 0.0j, 0.0 + 0.0j], dtype=complex)
+        logic.CNOT() @ np.array([0, 0, 0, 1], dtype=complex),
+        np.array([0.0 + 0.0j, 0.0 + 0.0j, 1.0 + 0.0j, 0.0 + 0.0j], dtype=complex),
     )
     assert np.allclose(
-        logic.CNOT(control=1, target=2, n=3) @ np.array([0, 0, 0, 1, 0, 0, 0, 0], dtype=complex), np.array([0, 0, 1, 0, 0, 0, 0, 0], dtype=complex)
+        logic.CNOT(control=1, target=2, n=3) @ np.array([0, 0, 0, 1, 0, 0, 0, 0], dtype=complex),
+        np.array([0, 0, 1, 0, 0, 0, 0, 0], dtype=complex),
     )
 
 
 def test_CZ():
-    assert np.allclose(logic.CZ() @ np.array([0, 0, 0, 1], dtype=complex), np.array([0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j, -1.0 + 0.0j], dtype=complex))
     assert np.allclose(
-        logic.CZ(control=1, target=2, n=3) @ np.array([0, 0, 0, 1, 0, 0, 0, 0], dtype=complex), np.array([0, 0, 0, -1, 0, 0, 0, 0], dtype=complex)
+        logic.CZ() @ np.array([0, 0, 0, 1], dtype=complex),
+        np.array([0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j, -1.0 + 0.0j], dtype=complex),
+    )
+    assert np.allclose(
+        logic.CZ(control=1, target=2, n=3) @ np.array([0, 0, 0, 1, 0, 0, 0, 0], dtype=complex),
+        np.array([0, 0, 0, -1, 0, 0, 0, 0], dtype=complex),
     )
 
 

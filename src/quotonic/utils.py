@@ -106,7 +106,10 @@ def comp_indices_from_symm_fock(fock_basis: np.ndarray, ancillary_modes: Optiona
 
 
 def comp_indices_from_asymm_fock(
-    asymm_basis: np.ndarray, symm_basis: np.ndarray, symm_mode_basis: np.ndarray, ancillary_modes: Optional[np.ndarray] = None
+    asymm_basis: np.ndarray,
+    symm_basis: np.ndarray,
+    symm_mode_basis: np.ndarray,
+    ancillary_modes: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Extract the indices of asymmetric Fock basis states that correspond to computational basis states by dual-rail encoding.
 

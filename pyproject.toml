@@ -53,7 +53,7 @@ dev = [
 ]
 
 [tool.black]
-line-length = 150
+line-length = 120
 include = '\.pyi?$'
 target-version = ['py310']
 fast = true
