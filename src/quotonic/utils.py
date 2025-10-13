@@ -6,7 +6,8 @@ from itertools import permutations
 from typing import Optional
 
 import numpy as np
-from scipy.special import factorial  # type: ignore
+from jax import vmap
+from jax.scipy.special import factorial
 
 
 def genHaarUnitary(m: int) -> np.ndarray:
@@ -61,7 +62,7 @@ def symm_fock_to_comp(fock_state: np.ndarray) -> np.ndarray:
         fock_state: $2n$-length array, where $n$ is the number of qubits, where each consecutive pair of elements signifies whether a qubit is 0 or 1
 
     Returns:
-        Computational basis state that corresponds to the given symmetric Fock basis state by dual-rail encoding, a $n$-length array
+        Computational basis state that corresponds to the given symmetric Fock basis state by dual-rail encoding, an $n$-length array
     """
 
     # check the validity of the provided symmetric Fock basis state
@@ -141,3 +142,19 @@ def comp_indices_from_asymm_fock(
         for j, asymm_state in enumerate(asymm_states):
             comp_indices_asymm[i, j] = int(np.where((asymm_basis == asymm_state).all(axis=1))[0].item())
     return comp_indices_asymm
+
+
+@vmap
+def vectorial_factorial(x: int | float) -> int | float:
+    """Compute the factorial on the input vectorially.
+
+    Simply put, this function wraps `jax.scipy.special.factorial` with the `jax.vmap` decorator. It doesn't really
+    need its own documented function, but I thought the name `vectorial_factorial` sounded cool.
+
+    Args:
+        x: integer to compute the factorial of
+
+    Returns:
+        Factorial of the input
+    """
+    return factorial(x)  # type: ignore

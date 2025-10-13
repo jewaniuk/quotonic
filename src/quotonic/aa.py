@@ -20,10 +20,10 @@ from typing import Tuple
 
 import jax.numpy as jnp
 from jax import jit, vmap
-from jax.scipy.special import factorial
 
 from quotonic.fock import build_secq_basis, build_firq_basis_wo_dups
 from quotonic.perm import EmptyPermanent, Permanent
+from quotonic.utils import vectorial_factorial
 from quotonic.types import jnp_ndarray
 
 
@@ -42,22 +42,6 @@ def gen_basis_combos(basis: jnp_ndarray) -> Tuple[jnp_ndarray, jnp_ndarray]:
     """
     N = jnp.shape(basis)[0]
     return jnp.repeat(basis, N, axis=0), jnp.vstack([basis] * N)
-
-
-@vmap
-def vectorial_factorial(x: int | float) -> int | float:
-    """Compute the factorial on the input vectorially.
-
-    Simply put, this function wraps `jax.scipy.special.factorial` with the `jax.vmap` decorator. It doesn't really
-    need its own documented function, but I thought the name `vectorial_factorial` sounded cool.
-
-    Args:
-        x: integer to compute the factorial of
-
-    Returns:
-        Factorial of the input
-    """
-    return factorial(x)  # type: ignore
 
 
 @vmap
