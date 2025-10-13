@@ -7,9 +7,13 @@ from functools import reduce
 import numpy as np
 import numpy.typing as npt
 
+from quotonic.types import np_ndarray
 
-def build_comp_basis(n: int) -> np.ndarray:
+
+def build_comp_basis(n: int) -> np_ndarray:
     """Generate the computational basis for a given number of qubits.
+    
+    ADD DOCUMENTATION HERE
 
     Args:
         n: number of qubits, $n$
@@ -29,8 +33,10 @@ def build_comp_basis(n: int) -> np.ndarray:
     return basis
 
 
-def H(n: int = 1) -> np.ndarray:
-    """Generate the matrix representation of a $n$ Hadamard gates applied to $n$ qubits individually.
+def H(n: int = 1) -> np_ndarray:
+    """Generate the matrix representation of $n$ Hadamard gates applied to $n$ qubits individually.
+    
+    ADD DOCUMENTATION HERE
 
     Args:
         n: number of qubits, $n$
@@ -43,8 +49,10 @@ def H(n: int = 1) -> np.ndarray:
     return mat
 
 
-def CNOT(control: int = 0, target: int = 1, n: int = 2) -> np.ndarray:
+def CNOT(control: int = 0, target: int = 1, n: int = 2) -> np_ndarray:
     """Generate the matrix representation of a CNOT gate between the specified control and target qubits.
+
+    ADD DOCUMENTATION HERE
 
     Args:
         control: index of the control qubit
@@ -87,8 +95,10 @@ def CNOT(control: int = 0, target: int = 1, n: int = 2) -> np.ndarray:
     return mat
 
 
-def CZ(control: int = 0, target: int = 1, n: int = 2) -> np.ndarray:
+def CZ(control: int = 0, target: int = 1, n: int = 2) -> np_ndarray:
     """Generate the matrix representation of a CZ gate between the specified control and target qubits.
+
+    ADD DOCUMENTATION HERE
 
     Args:
         control: index of the control qubit
@@ -131,11 +141,13 @@ def CZ(control: int = 0, target: int = 1, n: int = 2) -> np.ndarray:
     return mat
 
 
-def BSA() -> np.ndarray:
+def BSA() -> np_ndarray:
     """Generate the matrix representation of a Bell State Analyzer in the computational basis.
+
+    ADD DOCUMENTATION HERE
 
     Returns:
         Matrix representation of a Bell State Analyzer in the computational basis, as a $4\\times 4$ array
     """
-    mat: npt.NDArray[np.complex128] = np.kron(H(), np.eye(2, dtype=complex)) @ CNOT()
+    mat = np.kron(H(), np.eye(2, dtype=complex)) @ CNOT()
     return mat

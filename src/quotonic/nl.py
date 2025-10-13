@@ -67,7 +67,7 @@ def build_kerr(
         m: number of optical modes, $m$
         varphi: effective nonlinear phase shifts for each single-site nonlinear element in $\\text{rad}$, $\\varphi$,
             a float when all $m$ are the same, otherwise an $m$-length array
-        basis_type: specifies whether the unitary should be constructed in the first or second-quantized bases
+        basis_type: specifies whether the unitary should be constructed in the first or second-quantized basis
         burnout_map: array of length $m$, with either boolean or binary elements, specifying whether nonlinearities are
             on/off for specific modes
 
@@ -139,7 +139,7 @@ def build_photon_mp(
         m: number of optical modes, $m$
         varphi1: phase shift applied to the subtracted photon in $\\text{rad}$, $\\varphi_1$
         varphi2: phase shift applied to the remaining photons in $\\text{rad}$, $\\varphi_2$
-        basis_type: specifies whether the unitary should be constructed in the first or second-quantized bases
+        basis_type: specifies whether the unitary should be constructed in the first or second-quantized basis
         burnout_map: array of length $m$, with either boolean or binary elements, specifying whether nonlinearities are
             on/off for specific modes
 
