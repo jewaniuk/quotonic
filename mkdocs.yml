@@ -9,23 +9,27 @@ copyright: Maintained by <a href="https://www.linkedin.com/in/jacobewaniuk/">Jac
 use_directory_urls: false
 
 nav:
-  - Home: index.md
-  - Fock: fock.md
-  - Clements: clements.md
-  - Aaronson & Arkhipov: aa.md
-  - Nonlinearities: nl.md
-  - Quantum Photonic Neural Network: qpnn.md
-  - Trainer: trainer.md
-  - Training Sets: training_sets.md
-  - Permanents: perm.md
-  - Logic: logic.md
-  - Utilities: utils.md
+  - fock: fock.md
+  - clements: clements.md
+  - aa: aa.md
+  - nl: nl.md
+  - qpnn: qpnn.md
+  - trainer: trainer.md
+  - training_sets: training_sets.md
+  - perm: perm.md
+  - logic: logic.md
+  - utils: utils.md
+  - types: types.md
 
 plugins:
   - mkdocstrings:
       handlers:
         python:
           paths: [src]
+          options:
+            extra:
+              show_object_full_path: true
+              show_module_path: true
 theme:
   name: material
   feature:
@@ -51,7 +55,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/QNLQueens/quotonic
+      link: https://github.com/jewaniuk/quotonic
     - icon: fontawesome/brands/python
       link: https://pypi.com/project/quotonic
 

@@ -12,6 +12,8 @@ from itertools import combinations_with_replacement, product
 
 import numpy as np
 
+from quotonic.types import np_ndarray
+
 
 @cache
 def calc_firq_dim(n: int, m: int) -> int:
@@ -75,7 +77,7 @@ def calc_secq_dim(n: int, m: int) -> int:
 
 
 @cache
-def build_firq_basis(n: int, m: int) -> np.ndarray:
+def build_firq_basis(n: int, m: int) -> np_ndarray:
     """Generate a catalog of all states in the first quantization basis.
 
     Given a number of photons $n$ and a number of optical modes $m$, this function creates each state in the basis
@@ -109,7 +111,7 @@ def build_firq_basis(n: int, m: int) -> np.ndarray:
 
 
 @cache
-def build_firq_basis_wo_dups(n: int, m: int) -> np.ndarray:
+def build_firq_basis_wo_dups(n: int, m: int) -> np_ndarray:
     """Generate a catalog of all states in the first quantization basis, avoiding indistinguishable duplicates,
     where each is denoted with $n$ slots where each slot specifies which of the $m$ modes the photon resides in.
 
@@ -136,13 +138,13 @@ def build_firq_basis_wo_dups(n: int, m: int) -> np.ndarray:
 
     Returns:
         $N\\times n$ array that catalogs all states in the $N$-dimensional first quantization basis,
-        when indistinguishable duplicates are removed
+            when indistinguishable duplicates are removed
     """
     return np.array(list(combinations_with_replacement(range(m), n)))
 
 
 @cache
-def build_secq_basis(n: int, m: int) -> np.ndarray:
+def build_secq_basis(n: int, m: int) -> np_ndarray:
     """Generate a catalog of all states in the second quantization Fock basis, denoted with $m$ slots where each slot
     specifies the number of photons residing in the corresponding mode.
 
