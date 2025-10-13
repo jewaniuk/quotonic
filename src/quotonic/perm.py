@@ -16,6 +16,8 @@ import jax.numpy as jnp
 from jax import jit, lax, vmap
 from jax.typing import DTypeLike
 
+from quotonic.types import jnp_ndarray
+
 
 @vmap
 def prep_gray_code(i: int) -> tuple:
@@ -42,7 +44,7 @@ def prep_gray_code(i: int) -> tuple:
 
 
 @jit
-def calc_perm_ryser(U: jnp.ndarray) -> DTypeLike:
+def calc_perm_ryser(U: jnp_ndarray) -> DTypeLike:
     """Compute the permanent of a square matrix $\\mathbf{U}$ using Ryser's algorithm with Gray code ordering.
 
     This function is wrapped with `jax.jit` such that it can be compiled at runtime.
@@ -70,7 +72,7 @@ def calc_perm_ryser(U: jnp.ndarray) -> DTypeLike:
 
 
 @jit
-def calc_perm_bbfg(U: jnp.ndarray) -> DTypeLike:
+def calc_perm_bbfg(U: jnp_ndarray) -> DTypeLike:
     """Compute the permanent of a square matrix $\\mathbf{U}$ using the BBFG algorithm with Gray code ordering.
 
     This function is wrapped with `jax.jit` such that it can be compiled at runtime.
@@ -111,7 +113,7 @@ def calc_perm_bbfg(U: jnp.ndarray) -> DTypeLike:
 
 
 @partial(jit, static_argnums=(1,))
-def calc_perm(U: jnp.ndarray, algo: str = "bbfg") -> DTypeLike:
+def calc_perm(U: jnp_ndarray, algo: str = "bbfg") -> DTypeLike:
     """Compute the permanent of a square matrix $\\mathbf{U}$.
 
     Args:
@@ -155,11 +157,11 @@ class Permanent:
     Attributes:
         n (int): dimension of the square matrices, $n$
         perm (callable): function that computes the permanent of a given $n\\times n$ matrix $\\mathbf{U}$
-        gray_diff_ind (jnp.ndarray): array of matrix indices for computing permanents using Gray code ordering,
+        gray_diff_ind (jnp_ndarray): array of matrix indices for computing permanents using Gray code ordering,
             defaults to an empty array if $n < 3$
-        direction (jnp.ndarray): array of factors to apply in individual steps of the permanent calculation
+        direction (jnp_ndarray): array of factors to apply in individual steps of the permanent calculation
             algorithms, defaults to an empty array if $n < 3$
-        sign (jnp.ndarray): array of $\\pm 1$ factors to apply to the results of individual steps of the permanent
+        sign (jnp_ndarray): array of $\\pm 1$ factors to apply to the results of individual steps of the permanent
             calculation algorithms, defaults to an empty array if $n < 3$
         N (int): if the BBFG algorithm is selected, $N = 2^{n-1}$, otherwise, it is unused and defaults to 0
     """
@@ -221,7 +223,7 @@ class Permanent:
         self.sign = jnp.resize(jnp.array([-1, 1], dtype=jnp.int16), (two_to_n - 1,))
 
     @partial(jit, static_argnums=(0,))
-    def perm_bbfg(self, U: jnp.ndarray) -> DTypeLike:
+    def perm_bbfg(self, U: jnp_ndarray) -> DTypeLike:
         """Compute the permanent of a square matrix $\\mathbf{U}$ using the BBFG algorithm with Gray code ordering.
 
         Args:
@@ -248,7 +250,7 @@ class Permanent:
         ) / self.N
 
     @partial(jit, static_argnums=(0,))
-    def perm_ryser(self, U: jnp.ndarray) -> DTypeLike:
+    def perm_ryser(self, U: jnp_ndarray) -> DTypeLike:
         """Compute the permanent of a square matrix $\\mathbf{U}$ using Ryser's algorithm with Gray code ordering.
 
         Args:
@@ -272,6 +274,6 @@ class EmptyPermanent:
         """Initialization of an EmptyPermanent instance."""
         self.fake = True
 
-    def perm(self, U: jnp.ndarray) -> jnp.ndarray:
+    def perm(self, U: jnp_ndarray) -> jnp_ndarray:
         """Fake method required for the placeholder."""
         return U[0, 0] if self.fake else U[0, 0]
