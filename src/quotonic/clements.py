@@ -247,6 +247,9 @@ class Mesh:
         It is termed a "single-photon" unitary as it is a representation only in the Fock basis of $m$ modes when $n
         = 1$. To obtain the "multi-photon" unitary, a transformation must be applied (see [AA](aa.md)).
 
+        The code in this method is heavily inspired by [CasOptAx](https://github.com/JasvithBasani/CasOptAx), which is
+        properly cited at the top of the page.
+
         Args:
             phi: phase shifts, $\\phi$, for all MZIs in the mesh
             theta: phase shifts, $\\theta$, for all MZIs in the mesh
