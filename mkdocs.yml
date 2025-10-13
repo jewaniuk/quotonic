@@ -1,10 +1,10 @@
 site_name: quotonic
-repo_url: https://github.com/QNLQueens/quotonic
+repo_url: https://github.com/jewaniuk/quotonic
 site_url: ""
-site_description: A platform for performing efficient simulations in the quantum photonic domain.
+site_description: A platform for performing efficient simulations of nonlinear quantum photonic circuits.
 site_author: Jacob Ewaniuk
 edit_uri: edit/main/docs/
-repo_name: QNLQueens/quotonic
+repo_name: jewaniuk/quotonic
 copyright: Maintained by <a href="https://www.linkedin.com/in/jacobewaniuk/">Jacob Ewaniuk</a>.
 use_directory_urls: false
 
@@ -26,9 +26,6 @@ plugins:
       handlers:
         python:
           paths: [src]
-          setup_commands:
-            - import sys
-            - sys.path.append('../')
 theme:
   name: material
   feature:
