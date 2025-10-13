@@ -3,7 +3,7 @@ A platform for performing efficient simulations of nonlinear quantum photonic ci
 
 ---
 
-[![python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-ff69b4)]()
+[![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-ff69b4)]()
 [![build](https://github.com/QNLQueens/quotonic/actions/workflows/quality.yml/badge.svg)](https://github.com/QNLQueens/quotonic/actions/workflows/quality.yml)
 [![tests](https://github.com/QNLQueens/quotonic/actions/workflows/tests.yml/badge.svg)](https://github.com/QNLQueens/quotonic/actions/workflows/tests.yml)
 [![docs](https://github.com/QNLQueens/quotonic/actions/workflows/docs.yml/badge.svg)](https://github.com/QNLQueens/quotonic/actions/workflows/docs.yml)
