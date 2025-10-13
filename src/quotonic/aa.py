@@ -12,7 +12,7 @@ as originally designed for use in [G. R. Steinbrecher *et al*., “Quantum optic
 **5**, 60 (2019)](https://doi.org/10.1038/s41534-019-0174-7), and by [Cascaded Optical Systems Approach to Neural
 Networks (CasOptAx)](https://github.com/JasvithBasani/CasOptAx) as originally designed for use in [J. R. Basani *et
 al*., "Universal logical quantum photonic neural network processor via cavity-assisted interactions", *npj Quantum
-Inf* **11**, 142 (2025)](https://doi.org/10.1038/s41534-025-01096-9)/
+Inf* **11**, 142 (2025)](https://doi.org/10.1038/s41534-025-01096-9).
 """
 
 from functools import partial
