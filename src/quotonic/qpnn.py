@@ -17,8 +17,8 @@ from quotonic.aa import SecqTransformer
 from quotonic.clements import Mesh
 from quotonic.fock import build_secq_basis, calc_firq_dim, calc_secq_dim
 from quotonic.nl import build_kerr, build_photon_mp
-from quotonic.utils import comp_indices_from_secq
 from quotonic.types import jnp_ndarray
+from quotonic.utils import comp_indices_from_secq
 
 
 class QPNN:
@@ -45,9 +45,7 @@ class QPNN:
         """
 
         # check that basis_type is valid
-        assert (basis_type == "sec") or (
-            basis_type == "firq"
-        ), "Basis type must be 'secq' or 'firq'"
+        assert (basis_type == "secq") or (basis_type == "firq"), "Basis type must be 'secq' or 'firq'"
 
         # store the provided properties of the QPNN, compute others
         self.n = n
@@ -75,12 +73,12 @@ class IdealQPNN(QPNN):
             of the linear layers
         varphi (float): effective nonlinear phase shift, $\\varphi$
         kerr (jnp_ndarray): $N\\times N$ array, the matrix representation of the set of single-site Kerr-like
-            nonlinearities resolved in the symmetric Fock basis
+            nonlinearities resolved in the second quantization Fock basis
         K (int): number of input-target state pairs in the QPNN training set, defaults to 0 if none provided
         psi_in (jnp_ndarray): $K\\times N$ array containing the $K$ input states in the QPNN training set, resolved in
-            the $N$-dimensional symmetric Fock basis, defaults to an empty array if none provided
+            the $N$-dimensional second quantization Fock basis, defaults to an empty array if none provided
         psi_targ (jnp_ndarray): $K\\times N$ array containing the $K$ target states in the QPNN training set, resolved
-            in the $N$-dimensional symmetric Fock basis, defaults to an empty array if none provided
+            in the $N$-dimensional second quantization Fock basis, defaults to an empty array if none provided
     """
 
     def __init__(self, n: int, m: int, L: int, varphi: float = np.pi, training_set: Optional[tuple] = None) -> None:
@@ -379,7 +377,7 @@ class ImperfectQPNN(QPNN):
                 of the mesh in the ith layer
 
         Returns:
-            $N\\times N$ array, the matrix representation of the QPNN resolved in the symmetric Fock basis
+            $N\\times N$ array, the matrix representation of the QPNN resolved in the second quantization Fock basis
         """
 
         # encode the single-photon unitary matrices for each linear layer in the Clements configuration
@@ -502,7 +500,7 @@ class TreeQPNN(QPNN):
         varphi (tuple): tuple of the phase shifts applied to the subtracted photon, followed by that applied to the
             remaining photons, for the 3LS photon $\\mp$ nonlinearity, in $\\text{rad}$, $(\\varphi_1, \\varphi2)$
         nls (tuple): tuple of $b + 1$ $N\\times N$ arrays, the $b + 1$ matrix representations of a set of single-site
-            3LS photon $\\mp$ nonlinearities resolved in the symmetric Fock bases for all $1 \\leq n \\leq b + 1$
+            3LS photon $\\mp$ nonlinearities resolved in the Fock bases for all $1 \\leq n \\leq b + 1$
         K (tuple): the numbers of input-target state pairs in the QPNN training set for each $1 \\leq n \\leq b + 1$,
             defaults to a tuple of zeros if none provided
         psi_in (tuple): all $K\\times N$ arrays containing the $K$ input states of the QPNN training set, resolved in
@@ -710,7 +708,7 @@ class TreeQPNN(QPNN):
         # check that a training set has been provided
         assert self.K[0] > 0, "No training set was provided for the QPNN."
 
-        # construct the QPNN system function in all $N$-dimensional symmetric Fock bases for all 1 <= n <= b + 1
+        # construct the QPNN system function in all $N$-dimensional Fock bases for all 1 <= n <= b + 1
         S = self.build(phi, theta, delta)
 
         def n_photon_Fus(Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray) -> jnp_ndarray:
@@ -746,7 +744,7 @@ class TreeQPNN(QPNN):
         # check that a training set has been provided
         assert self.K[0] > 0, "No training set was provided for the QPNN."
 
-        # construct the QPNN system function in all $N$-dimensional symmetric Fock bases for all 1 <= n <= b + 1
+        # construct the QPNN system function in all $N$-dimensional Fock bases for all 1 <= n <= b + 1
         S = self.build(phi, theta, delta)
 
         def n_photon_Fus(Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray) -> jnp_ndarray:

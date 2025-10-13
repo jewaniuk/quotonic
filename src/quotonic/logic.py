@@ -12,7 +12,7 @@ from quotonic.types import np_ndarray
 
 def build_comp_basis(n: int) -> np_ndarray:
     """Generate the computational basis for a given number of qubits.
-    
+
     ADD DOCUMENTATION HERE
 
     Args:
@@ -35,7 +35,7 @@ def build_comp_basis(n: int) -> np_ndarray:
 
 def H(n: int = 1) -> np_ndarray:
     """Generate the matrix representation of $n$ Hadamard gates applied to $n$ qubits individually.
-    
+
     ADD DOCUMENTATION HERE
 
     Args:
@@ -45,8 +45,8 @@ def H(n: int = 1) -> np_ndarray:
         Matrix representation of a Hadamard gate, as a $2\\times 2 array
     """
     mat_1 = np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)
-    mat: npt.NDArray[np.complex128] = reduce(np.kron, [mat_1] * n)
-    return mat
+    mat = reduce(np.kron, [mat_1] * n)
+    return mat  # type: ignore
 
 
 def CNOT(control: int = 0, target: int = 1, n: int = 2) -> np_ndarray:
@@ -150,4 +150,4 @@ def BSA() -> np_ndarray:
         Matrix representation of a Bell State Analyzer in the computational basis, as a $4\\times 4$ array
     """
     mat = np.kron(H(), np.eye(2, dtype=complex)) @ CNOT()
-    return mat
+    return mat  # type: ignore

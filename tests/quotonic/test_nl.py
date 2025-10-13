@@ -11,7 +11,7 @@ def test_build_kerr():
     result = np.array([[1.0 + 0.0j, 0.0 + 0.0j], [0.0 + 0.0j, 1.0 + 0.0j]], dtype=complex)
     assert np.allclose(nl.build_kerr(n, m, varphi), result)
 
-    # symmetric, no burnout map
+    # secq, no burnout map
     n = 2
     m = 4
     varphi = np.pi
@@ -142,7 +142,7 @@ def test_build_kerr():
     )
     assert np.allclose(nl.build_kerr(n, m, varphi), result)
 
-    # asymmetric, no burnout map
+    # firq, no burnout map
     n = 3
     m = 2
     varphi = np.pi / 2
@@ -231,9 +231,9 @@ def test_build_kerr():
         ],
         dtype=complex,
     )
-    assert np.allclose(nl.build_kerr(n, m, varphi, basis_type="asymmetric"), result)
+    assert np.allclose(nl.build_kerr(n, m, varphi, basis_type="firq"), result)
 
-    # symmetric, with burnout map
+    # secq, with burnout map
     n = 2
     m = 2
     varphi = np.pi
@@ -248,7 +248,7 @@ def test_build_kerr():
     )
     assert np.allclose(nl.build_kerr(n, m, varphi, burnout_map=burnout_map), result)
 
-    # asymmetric, with burnout map
+    # firq, with burnout map
     n = 2
     m = 3
     varphi = np.pi / 4
@@ -357,7 +357,7 @@ def test_build_kerr():
         ],
         dtype=complex,
     )
-    assert np.allclose(nl.build_kerr(n, m, varphi, basis_type="asymmetric", burnout_map=burnout_map), result)
+    assert np.allclose(nl.build_kerr(n, m, varphi, basis_type="firq", burnout_map=burnout_map), result)
 
 
 def test_build_photon_mp():
@@ -369,7 +369,7 @@ def test_build_photon_mp():
     result = np.array([[1.0 + 0.0j, 0.0 + 0.0j], [0.0 + 0.0j, 1.0 + 0.0j]], dtype=complex)
     assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2), result)
 
-    # symmetric, no burnout map
+    # secq, no burnout map
     n = 2
     m = 4
     varphi1 = 0.0
@@ -501,7 +501,7 @@ def test_build_photon_mp():
     )
     assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2), result)
 
-    # asymmetric, no burnout map
+    # firq, no burnout map
     n = 3
     m = 2
     varphi1 = np.pi / 2
@@ -591,9 +591,9 @@ def test_build_photon_mp():
         ],
         dtype=complex,
     )
-    assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2, basis_type="asymmetric"), result)
+    assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2, basis_type="firq"), result)
 
-    # symmetric, with burnout map
+    # secq, with burnout map
     n = 2
     m = 2
     varphi1 = np.pi
@@ -609,7 +609,7 @@ def test_build_photon_mp():
     )
     assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2, burnout_map=burnout_map), result)
 
-    # asymmetric, with burnout map
+    # firq, with burnout map
     n = 2
     m = 3
     varphi1 = np.pi / 4
@@ -719,6 +719,4 @@ def test_build_photon_mp():
         ],
         dtype=complex,
     )
-    assert np.allclose(
-        nl.build_photon_mp(n, m, varphi1, varphi2, basis_type="asymmetric", burnout_map=burnout_map), result
-    )
+    assert np.allclose(nl.build_photon_mp(n, m, varphi1, varphi2, basis_type="firq", burnout_map=burnout_map), result)

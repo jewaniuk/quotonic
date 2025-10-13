@@ -1,4 +1,4 @@
-# from quotonic.aa import _symmetric_transform, asymmetric_transform, symmetric_transform
+from .aa import SecqTransformer
 from .clements import Mesh
 from .fock import (
     build_firq_basis,
@@ -7,20 +7,13 @@ from .fock import (
     calc_firq_dim,
     calc_secq_dim,
 )
-# from quotonic.logic import build_comp_basis
-# from quotonic.nl import build_kerr
-# from quotonic.perm import calc_perm
-# from quotonic.pulses import gaussian_t, gaussian_w
-# from quotonic.qpnn import QPNN, IdealQPNN, JitterQPNN
-# from quotonic.trainer import IdealTrainer, JitterTrainer, Trainer
-# from quotonic.training_sets import BSA, CNOT, CZ, JitterBSA
-# from quotonic.utils import (
-#     comp_indices_from_asymm_fock,
-#     comp_indices_from_symm_fock,
-#     comp_to_symm_fock,
-#     genHaarUnitary,
-#     symm_fock_to_comp,
-# )
-from .types import np_ndarray, jnp_ndarray
+from .logic import build_comp_basis
+from .nl import build_kerr, build_photon_mp
+from .perm import EmptyPermanent, Permanent, calc_perm
+from .qpnn import QPNN, IdealQPNN, ImperfectQPNN, TreeQPNN
+from .trainer import IdealTrainer, ImperfectTrainer, Trainer, TreeTrainer
+from .training_sets import BSA, CNOT, CZ, Tree
+from .types import jnp_ndarray, np_ndarray
+from .utils import comp_indices_from_secq, comp_to_secq, genHaarUnitary, secq_to_comp
 
 __all__ = ["np_ndarray", "jnp_ndarray"]

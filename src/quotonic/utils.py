@@ -40,8 +40,8 @@ def comp_to_secq(comp_state: np.ndarray) -> np.ndarray:
             is 0 or 1
 
     Returns:
-         Fock basis state that corresponds to the given computational basis state by dual-rail encoding, a $2n$-length
-            array
+        Fock basis state that corresponds to the given computational basis state by dual-rail encoding, a $2n$-length
+        array
     """
 
     # check the validity of the provided computational basis state

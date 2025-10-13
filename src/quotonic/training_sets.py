@@ -10,8 +10,8 @@ import numpy as np
 
 import quotonic.logic as logic
 from quotonic.fock import build_secq_basis
-from quotonic.utils import comp_indices_from_secq
 from quotonic.types import np_ndarray
+from quotonic.utils import comp_indices_from_secq
 
 
 def CNOT() -> Tuple[np_ndarray, np_ndarray]:

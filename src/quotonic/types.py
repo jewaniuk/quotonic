@@ -4,8 +4,9 @@ used throughout the package such that the different array types are clearly labe
 """
 
 from typing import TypeAlias
-import numpy as np
+
 import jax.numpy as jnp
+import numpy as np
 
 np_ndarray: TypeAlias = np.ndarray
 """type alias for a NumPy ndarray (from `numpy`)"""

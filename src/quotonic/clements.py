@@ -24,7 +24,7 @@ import jax.numpy as jnp
 import numpy as np
 from jax import jit
 
-from quotonic.types import np_ndarray, jnp_ndarray
+from quotonic.types import jnp_ndarray, np_ndarray
 
 
 class Mesh:

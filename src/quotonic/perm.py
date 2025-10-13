@@ -270,7 +270,7 @@ class Permanent:
 class EmptyPermanent:
     """Placeholder permanent class for mypy typing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialization of an EmptyPermanent instance."""
         self.fake = True
 

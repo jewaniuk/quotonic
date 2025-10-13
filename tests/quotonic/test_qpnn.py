@@ -1,18 +1,18 @@
 import jax.numpy as jnp
 import numpy as np
 
-from quotonic.qpnn import JitterQPNN
-from quotonic.training_sets import JitterBSA
+from quotonic.qpnn import TreeQPNN
+from quotonic.training_sets import Tree
 from quotonic.utils import genHaarUnitary
 
 
-def test_JitterQPNN():
-    n = 2
-    m = 4
+def test_TreeQPNN():
+    b = 2
     L = 2
-    training_set, comp_indices = JitterBSA(0.0)
-    qpnn = JitterQPNN(n, m, L, training_set=training_set, comp_indices=comp_indices)
+    training_set = Tree(b)
+    qpnn = TreeQPNN(b, L, training_set=training_set)
 
+    m = 2 * (b + 1)
     phi, theta, delta = (
         np.zeros((L, m * (m - 1) // 2), dtype=float),
         np.zeros((L, m * (m - 1) // 2), dtype=float),
@@ -20,18 +20,8 @@ def test_JitterQPNN():
     )
     for i in range(L):
         U = genHaarUnitary(m)
-        phi[i], theta[i], delta[i] = qpnn.mesh.decode(U)
+        phi[i], theta[i], delta[i] = qpnn.meshes[0].decode(U)
     phases = (jnp.asarray(phi), jnp.asarray(theta), jnp.asarray(delta))
 
-    Fw, Fb = qpnn.calc_unc_fidelities(*phases)
-    Fw = float(Fw)
-    Fb = float(Fb)
-    assert (Fw > 0) and (Fw < 1)
-    assert (Fb > 0) and (Fb < 1)
-
-    Fuw, Fub, Fcw, Fcb, rate = qpnn.calc_performance_measures(*phases)
-    assert (Fuw > 0) and (Fuw < 1)
-    assert (Fub > 0) and (Fub < 1)
-    assert (Fcw > 0) and (Fcw < 1)
-    assert (Fcb > 0) and (Fcb < 1)
-    assert (rate > 0) and (rate < 1)
+    Fu = float(qpnn.calc_unc_fidelity(*phases))
+    assert (Fu > 0) and (Fu < 1)

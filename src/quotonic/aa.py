@@ -21,10 +21,10 @@ from typing import Tuple
 import jax.numpy as jnp
 from jax import jit, vmap
 
-from quotonic.fock import build_secq_basis, build_firq_basis_wo_dups
+from quotonic.fock import build_firq_basis_wo_dups, build_secq_basis
 from quotonic.perm import EmptyPermanent, Permanent
-from quotonic.utils import vectorial_factorial
 from quotonic.types import jnp_ndarray
+from quotonic.utils import vectorial_factorial
 
 
 def gen_basis_combos(basis: jnp_ndarray) -> Tuple[jnp_ndarray, jnp_ndarray]:

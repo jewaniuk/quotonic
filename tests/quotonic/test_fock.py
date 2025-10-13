@@ -121,7 +121,7 @@ def test_build_firq_basis_wo_dups():
             [2, 2, 2],
         ]
     )
-    assert np.allclose(fock.build_firq_basis(n, m), result)
+    assert np.allclose(fock.build_firq_basis_wo_dups(n, m), result)
 
 
 def test_calc_secq_dim():

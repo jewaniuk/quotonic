@@ -13,13 +13,9 @@ from jax import value_and_grad
 from jax.typing import DTypeLike
 
 from quotonic.clements import Mesh
-from quotonic.qpnn import (
-    IdealQPNN,
-    ImperfectQPNN,
-    TreeQPNN,
-)
-from quotonic.utils import genHaarUnitary
+from quotonic.qpnn import IdealQPNN, ImperfectQPNN, TreeQPNN
 from quotonic.types import jnp_ndarray
+from quotonic.utils import genHaarUnitary
 
 
 class Trainer:
@@ -142,7 +138,7 @@ class IdealTrainer(Trainer):
             Cost (i.e. network error) of the QPNN
         """
         F = self.qpnn.calc_fidelity(phi, theta, delta)
-        return 1 - F # type: ignore
+        return 1 - F  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
@@ -205,7 +201,7 @@ class IdealTrainer(Trainer):
             C = 1.0
             for epoch in range(self.num_epochs):
                 C, Theta, optstate = self.update(*Theta, optstate)
-                F[epoch] = 1 - C # type: ignore
+                F[epoch] = 1 - C  # type: ignore
 
                 if epoch % self.print_every == 0:
                     print(f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Fidelity: {F[epoch]:.4g}")
@@ -288,7 +284,7 @@ class ImperfectTrainer(Trainer):
             Cost (i.e. network error) of the QPNN
         """
         Fu = self.qpnn.calc_unc_fidelity(phi, theta, delta)
-        return 1 - Fu # type: ignore
+        return 1 - Fu  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
@@ -369,7 +365,7 @@ class ImperfectTrainer(Trainer):
             C = 1.0
             for epoch in range(self.num_epochs):
                 C, Theta, optstate = self.update(*Theta, optstate)
-                Fu[epoch] = 1 - C # type: ignore
+                Fu[epoch] = 1 - C  # type: ignore
 
                 if epoch % self.print_every == 0:
                     print(f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Unconditional Fidelity: {Fu[epoch]:.4g}")
@@ -462,7 +458,7 @@ class TreeTrainer(Trainer):
             Cost (i.e. network error) of the QPNN
         """
         Fu_full = self.qpnn.calc_unc_fidelity(phi, theta, delta)
-        return 1 - Fu_full # type: ignore
+        return 1 - Fu_full  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
@@ -543,7 +539,7 @@ class TreeTrainer(Trainer):
             C = 1.0
             for epoch in range(self.num_epochs):
                 C, Theta, optstate = self.update(*Theta, optstate)
-                Fu_full[epoch] = 1 - C # type: ignore
+                Fu_full[epoch] = 1 - C  # type: ignore
 
                 if epoch % self.print_every == 0:
                     print(f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Full Unconditional Fidelity: {Fu_full[epoch]:.4g}")
