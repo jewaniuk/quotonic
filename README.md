@@ -14,7 +14,7 @@ A platform for performing efficient simulations of nonlinear quantum photonic ci
 [![Code Style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Coverage Status](./badges/coverage.svg)](https://pytest-cov.readthedocs.io/en/latest/)
-[![Flake8 Status](./badges/flake8.svg?dummy=8484744)](https://flake8.pycqa.org/en/latest/)
+[![Flake8 Status](./badges/flake8.svg)](https://flake8.pycqa.org/en/latest/)
 
 Add shields for python versions passing, docs passing, wheels building
 
