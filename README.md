@@ -8,7 +8,7 @@ A platform for performing efficient simulations of nonlinear quantum photonic ci
 [![tests](https://github.com/jewaniuk/quotonic/actions/workflows/tests.yml/badge.svg)](https://github.com/jewaniuk/quotonic/actions/workflows/tests.yml)
 [![docs](https://github.com/jewaniuk/quotonic/actions/workflows/docs.yml/badge.svg)](https://github.com/jewaniuk/quotonic/actions/workflows/docs.yml)
 [![wheels](https://github.com/jewaniuk/quotonic/actions/workflows/wheels.yml/badge.svg)](https://github.com/jewaniuk/quotonic/actions/workflows/wheels.yml)
-[![license](https://img.shields.io/badge/license-MIT-blueviolet)](https://github.com/QNLQueens/quotonic/blob/main/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blueviolet)](https://github.com/jewaniuk/quotonic/blob/main/LICENSE)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
