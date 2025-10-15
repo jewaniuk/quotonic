@@ -15,6 +15,10 @@ docs: ## Build and serve the documentation
 docs-test: ## Test if documentation can be built without warnings or errors
 	@mkdocs build -s
 
+.PHONY: docs-gh
+docs-gh: ## Build documentation for GitHub Pages
+	@mkdocs gh-deploy
+
 .PHONY: check
 check: ## Run code quality tools
 	@echo "🚀 Linting code: Running pre-commit"
