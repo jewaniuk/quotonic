@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
-      - jax
   pull_request:
     types:  [opened, synchronize, reopened]
+
+permissions:
+  contents: write
 
 jobs:
   docs:
