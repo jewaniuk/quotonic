@@ -28,3 +28,6 @@ jobs:
 
       - name: check docs build
         run: mkdocs build -s
+
+      - name: deploy docs
+        run: mkdocs gh-deploy --force
