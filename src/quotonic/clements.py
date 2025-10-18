@@ -42,10 +42,10 @@ class Mesh:
 
     Attributes:
         m (int): number of optical modes, $m$
-        ell_mzi (np_ndarray): $m\\times m$ array containing the percentage loss per arm of the interferometer mesh,
+        ell_mzi (jnp_ndarray): $m\\times m$ array containing the percentage loss per arm of the interferometer mesh,
             for each column of MZIs respectively
-        ell_ps (np_ndarray): $m$-length array containing the percentage loss for each of the output phase shifters
-        t_dc (np_ndarray): $2\\times m(m-1)/2$ array containing the splitting ratio (T:R) of each directional
+        ell_ps (jnp_ndarray): $m$-length array containing the percentage loss for each of the output phase shifters
+        t_dc (jnp_ndarray): $2\\times m(m-1)/2$ array containing the splitting ratio (T:R) of each directional
             coupler in the mesh, organized such that each column corresponds to one MZI, the top row being the first
             directional coupler and the bottom being the second, where the MZIs are ordered from top to bottom
             followed by left to right across the mesh
@@ -389,7 +389,7 @@ class Mesh:
             # multiply each component of the MZI together to form the full transformation from this column
             column = loss @ dc2 @ ps_2theta @ dc1 @ ps_phi
 
-            # add to list of column matrices that will multiplied together at the end
+            # add to list of column matrices that will multiply together at the end
             columns.append(column)
 
         # construct matrix that describes the transformation enacted by the output phase shifters in each mode
