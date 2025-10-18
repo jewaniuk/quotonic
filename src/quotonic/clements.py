@@ -250,9 +250,9 @@ class Mesh:
         properly cited at the top of the page.
 
         Args:
-            phi: phase shifts, $\\phi$, for all MZIs in the mesh
-            theta: phase shifts, $\\theta$, for all MZIs in the mesh
-            delta: phase shifts, $\\delta$, applied in each mode at the output of the mesh
+            phi: $m(m-1)/2$ phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in the mesh
+            theta: $m(m-1)/2$ phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in the mesh
+            delta: $m$ phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of the mesh
 
         Returns:
             An $m\\times m$ 2D array representative of the linear unitary transformation,
@@ -432,9 +432,9 @@ class Mesh:
                 \\boldsymbol{\\delta})$, to perform Clements decomposition on
 
         Returns:
-            phi: array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in the mesh
-            theta: array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in the mesh
-            delta: array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of the mesh
+            phi: array of $m(m-1)/2$ phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in the mesh
+            theta: array of $m(m-1)/2$ phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in the mesh
+            delta: array of $m$ phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of the mesh
         """
 
         # check that U is m x m
