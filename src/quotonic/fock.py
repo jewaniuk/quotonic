@@ -30,7 +30,7 @@ def calc_firq_dim(n: int, m: int) -> int:
         m: number of optical modes, $m$
 
     Returns:
-        Dimenstion of the first quantization basis, $N$
+        N: dimenstion of the first quantization basis, $N$
     """
     N: int = m**n
     return N
@@ -56,7 +56,7 @@ def calc_secq_dim(n: int, m: int) -> int:
         m: number of optical modes, $m$
 
     Returns:
-        Dimenstion of the second quantization Fock basis, $N$
+        N: dimenstion of the second quantization Fock basis, $N$
     """
 
     # store the top of {n + m - 1 \\choose n}

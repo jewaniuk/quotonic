@@ -70,8 +70,8 @@ def build_kerr(
             on/off for specific modes
 
     Returns:
-        $N\\times N$ array, the matrix representation of the set of single-site Kerr nonlinearities resolved in the
-            relevant basis
+        Sigma: $N\\times N$ array, the matrix representation of the set of single-site Kerr nonlinearities resolved in
+            the relevant basis
     """
 
     # check that basis_type is valid
@@ -118,7 +118,7 @@ def build_photon_mp(
     varphi1: float,
     varphi2: float,
     basis_type: str = "secq",
-    burnout_map: Optional[np_ndarray] = None,
+    burnout_map: np_ndarray | None = None,
 ) -> np_ndarray:
     """Construct the diagonal nonlinear $\\Lambda$-type 3LS photon $\\mp$ unitary in the relevant basis.
 
@@ -142,8 +142,8 @@ def build_photon_mp(
             on/off for specific modes
 
     Returns:
-        $N\\times N$ array, the matrix representation of the set of single-site photon $\\mp$ nonlinearities resolved
-            in the relevant basis
+        Sigma: $N\\times N$ array, the matrix representation of the set of single-site photon $\\mp$ nonlinearities
+            resolved in the relevant basis
     """
 
     # check that basis_type is valid

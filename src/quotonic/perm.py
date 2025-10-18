@@ -29,8 +29,8 @@ def prep_gray_code(i: int) -> tuple[int, int]:
         i: index typically used in loops that prepare Gray code
 
     Returns:
-        the difference between the old Gray value and the new
-        the direction of the algorithm, either +1 or -1
+        gray_diff: the difference between the old Gray value and the new
+        direction: the direction of the algorithm, either +1 or -1
     """
     old_gray = i ^ (i // 2)
     new_gray = (i + 1) ^ ((i + 1) // 2)
@@ -53,7 +53,7 @@ def calc_perm_ryser(U: jnp_ndarray) -> DTypeLike:
         U: square matrix whose permanent is to be computed
 
     Returns:
-        Permanent of the given square matrix
+        perm: permanent of the given square matrix
     """
 
     n = U.shape[0]
@@ -81,7 +81,7 @@ def calc_perm_bbfg(U: jnp_ndarray) -> DTypeLike:
         U: square matrix whose permanent is to be computed
 
     Returns:
-        Permanent of the given square matrix
+        perm: permanent of the given square matrix
     """
 
     n = U.shape[0]
@@ -121,7 +121,7 @@ def calc_perm(U: jnp_ndarray, algo: str = "bbfg") -> DTypeLike:
         algo: algorithm to compute the permanent with if the matrix dim is greater than 3, either "bbfg" or "ryser"
 
     Returns:
-        Permanent of the given square matrix
+        perm: permanent of the given square matrix
     """
 
     # extract the dimension of the square matrix U
@@ -230,7 +230,7 @@ class Permanent:
             U: square matrix whose permanent is to be computed
 
         Returns:
-            Permanent of the given square matrix
+            perm: permanent of the given square matrix
         """
         return (
             jnp.prod(jnp.sum(U, axis=0))
@@ -257,7 +257,7 @@ class Permanent:
             U: square matrix whose permanent is to be computed
 
         Returns:
-            Permanent of the given square matrix
+            perm: permanent of the given square matrix
         """
         return jnp.sum(
             self.sign

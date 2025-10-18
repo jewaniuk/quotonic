@@ -255,7 +255,7 @@ class Mesh:
             delta: $m$ phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of the mesh
 
         Returns:
-            An $m\\times m$ 2D array representative of the linear unitary transformation,
+            U: an $m\\times m$ 2D array representative of the linear unitary transformation,
                 $\\mathbf{U}(\\boldsymbol{\\phi}, \\boldsymbol{\\theta}, \\boldsymbol{\\delta})$, enacted by the
                 Clements mesh
         """
@@ -287,7 +287,8 @@ class Mesh:
             t_dc_col = self.t_dc[:, ind : ind + m_2 - m0 * even]
             ind += m_2 - m0 * even
 
-            # construct matrices that describe the transformations enacted by two full columns of T:R directional couplers, nominally 50:50
+            # construct matrices that describe the transformations enacted by two full columns of T:R
+            # directional couplers, nominally 50:50
             dc_diag = jnp.diag(
                 jnp.pad(
                     jnp.repeat(jnp.sqrt(t_dc_col[0]), 2),
@@ -360,7 +361,8 @@ class Mesh:
             )
             dc2 = dc_diag + dc_offdiag_up + dc_offdiag_down
 
-            # construct matrices that describe the transformations enacted by full columns of phi & 2theta phase shifters respectively
+            # construct matrices that describe the transformations enacted by full columns of
+            # phi & 2theta phase shifters respectively
             ps_phi = jnp.diag(
                 jnp.pad(
                     jnp.dstack((jnp.exp(1j * phi_col), jnp.ones(m_2 - m0 * even, dtype=complex))).reshape(

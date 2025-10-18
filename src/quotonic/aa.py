@@ -165,7 +165,7 @@ class SecqTransformer:
             U: $m\\times m$ single-photon unitary, $\\mathbf{U}$, to transform
 
         Returns:
-            $N\\times N$ multi-photon unitary, $\\boldsymbol{\\Phi(\\mathbf{U})}$, in the $N$-dimensional Fock
+            PhiU: $N\\times N$ multi-photon unitary, $\\boldsymbol{\\Phi(\\mathbf{U})}$, in the $N$-dimensional Fock
                 basis, that of $n$ photons and $m$ optical modes
         """
 
