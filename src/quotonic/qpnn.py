@@ -10,7 +10,9 @@ from typing import Optional
 import jax.numpy as jnp
 import numpy as np
 from jax import jit, vmap
-from jax.tree import map as tree_map, transpose as tree_transpose, structure as tree_structure
+from jax.tree import map as tree_map
+from jax.tree import structure as tree_structure
+from jax.tree import transpose as tree_transpose
 from jax.typing import DTypeLike
 
 from quotonic.aa import SecqTransformer
@@ -387,7 +389,7 @@ class ImperfectQPNN(QPNN):
                 ells_mzi[i] = np.random.normal(
                     1.0 - 10 ** (-0.1 * self.ell_mzi[0]),
                     self.ell_mzi[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_mzi[0]),
-                    self.m ** 2,
+                    self.m**2,
                 ).reshape((self.m, self.m))
                 ells_ps[i] = np.random.normal(
                     1.0 - 10 ** (-0.1 * self.ell_ps[0]),
@@ -710,7 +712,7 @@ class TreeQPNN(QPNN):
                 ells_mzi[i] = np.random.normal(
                     1.0 - 10 ** (-0.1 * self.ell_mzi[0]),
                     self.ell_mzi[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_mzi[0]),
-                    self.m ** 2,
+                    self.m**2,
                 ).reshape((self.m, self.m))
                 ells_ps[i] = np.random.normal(
                     1.0 - 10 ** (-0.1 * self.ell_ps[0]),
@@ -797,16 +799,14 @@ class TreeQPNN(QPNN):
         S = self.build(phi, theta, delta)
 
         def n_photon_succ_rates(
-            Sn: jnp_ndarray,
-            psi_in_n: jnp_ndarray,
-            psi_targ_n: jnp_ndarray,
-            comp_inds_n: jnp_ndarray
+            Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray, comp_inds_n: jnp_ndarray
         ) -> jnp_ndarray:
             @vmap
             def n_photon_unit_cell_succ_rates(inds: jnp_ndarray) -> jnp_ndarray:
                 psi_out_n = vmap(lambda psi: Sn[jnp.ix_(inds, inds)] @ psi)(psi_in_n)
                 succ_uc = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(psi_targ_n, psi_out_n)
                 return succ_uc
+
             succ_rates = n_photon_unit_cell_succ_rates(comp_inds_n)
             return jnp.hstack(succ_rates)
 
@@ -843,10 +843,7 @@ class TreeQPNN(QPNN):
         S = self.build(phi, theta, delta)
 
         def measures(
-            Sn: jnp_ndarray,
-            psi_in_n: jnp_ndarray,
-            psi_targ_n: jnp_ndarray,
-            comp_inds_n: jnp_ndarray
+            Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray, comp_inds_n: jnp_ndarray
         ) -> tuple:
             @vmap
             def measures_per_unit_cell(inds: jnp_ndarray) -> tuple:
@@ -860,13 +857,7 @@ class TreeQPNN(QPNN):
             return jnp.hstack(fids), jnp.hstack(succ_rates), jnp.hstack(logi_rates)
 
         # map through the different numbers of photons and unit cell operations, evaluating performance on the way
-        meas = tree_map(
-            measures,
-            S,
-            self.psi_in,
-            self.psi_targ,
-            self.comp_indices
-        )
+        meas = tree_map(measures, S, self.psi_in, self.psi_targ, self.comp_indices)
         meas_T = tree_transpose(
             outer_treedef=tree_structure(S),
             inner_treedef=tree_structure(meas[0]),
@@ -908,10 +899,7 @@ class TreeQPNN(QPNN):
         S = self.build(phi, theta, delta)
 
         def measures(
-            Sn: jnp_ndarray,
-            psi_in_n: jnp_ndarray,
-            psi_targ_n: jnp_ndarray,
-            comp_inds_n: jnp_ndarray
+            Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray, comp_inds_n: jnp_ndarray
         ) -> tuple:
             @vmap
             def measures_per_unit_cell(inds: jnp_ndarray) -> tuple:
@@ -927,13 +915,7 @@ class TreeQPNN(QPNN):
             return fid, succ_rate, logi_rate
 
         # map through the different numbers of photons and unit cell operations, evaluating performance on the way
-        meas = tree_map(
-            measures,
-            S,
-            self.psi_in,
-            self.psi_targ,
-            self.comp_indices
-        )
+        meas = tree_map(measures, S, self.psi_in, self.psi_targ, self.comp_indices)
         meas_T = tree_transpose(
             outer_treedef=tree_structure(S),
             inner_treedef=tree_structure(meas[0]),

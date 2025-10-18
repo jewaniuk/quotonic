@@ -23,5 +23,5 @@ def test_TreeQPNN():
         phi[i], theta[i], delta[i] = qpnn.meshes[0].decode(U)
     phases = (jnp.asarray(phi), jnp.asarray(theta), jnp.asarray(delta))
 
-    Fu = float(qpnn.calc_unc_fidelity(*phases))
-    assert (Fu > 0) and (Fu < 1)
+    cost = float(qpnn.calc_cost(*phases))
+    assert (cost > 0) and (cost < 1)

@@ -1,0 +1,8 @@
+[1m./quick-check.py[m[36m:[m5[36m:[m1[36m:[m [1m[31mE402[m module level import not at top of file
+[1m./quick-check.py[m[36m:[m6[36m:[m1[36m:[m [1m[31mE402[m module level import not at top of file
+[1m./quick-check.py[m[36m:[m7[36m:[m1[36m:[m [1m[31mE402[m module level import not at top of file
+[1m./quick-check.py[m[36m:[m8[36m:[m1[36m:[m [1m[31mE402[m module level import not at top of file
+[1m./quick-check.py[m[36m:[m9[36m:[m1[36m:[m [1m[31mE402[m module level import not at top of file
+[1m./quick-check.py[m[36m:[m63[36m:[m23[36m:[m [1m[31mW292[m no newline at end of file
+5     E402 module level import not at top of file
+1     W292 no newline at end of file

@@ -211,7 +211,7 @@ class Permanent:
         """Preparation of Gray code for computing matrix permanents using the BBFG algorithm."""
         self.N = 2 ** (self.n - 1)
         gray_diff, direction = prep_gray_code(jnp.arange(self.N - 1, dtype=jnp.int16))  # type: ignore
-        self.direction = 2 * direction
+        self.direction = 2 * direction  # type: ignore
         self.gray_diff_ind = jnp.array(jnp.log2(gray_diff), dtype=jnp.int16)
         self.sign = jnp.resize(jnp.array([-1, 1], dtype=jnp.int16), (self.N - 1,))
 

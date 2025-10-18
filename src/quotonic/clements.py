@@ -53,9 +53,9 @@ class Mesh:
     def __init__(
         self,
         m: int,
-        ell_mzi: np_ndarray | None,
-        ell_ps: np_ndarray | None,
-        t_dc: np_ndarray | None,
+        ell_mzi: np_ndarray | None = None,
+        ell_ps: np_ndarray | None = None,
+        t_dc: np_ndarray | None = None,
     ) -> None:
         """Initialization of a Mach-Zehnder interferometer mesh arranged in the Clements configuration.
 

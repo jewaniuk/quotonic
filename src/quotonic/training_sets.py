@@ -137,7 +137,7 @@ def BSA() -> Tuple[np_ndarray, np_ndarray]:
     return psi_in, psi_targ
 
 
-def Tree(b: int) -> tuple:
+def Tree(b: int) -> tuple:  # noqa: C901
     """Construct the training set for a QPNN that powers a tree-type photonic cluster state generation protocol.
 
     ADD DOCUMENTATION HERE
