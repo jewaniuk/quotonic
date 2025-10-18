@@ -137,7 +137,95 @@ def BSA() -> Tuple[np_ndarray, np_ndarray]:
     return psi_in, psi_targ
 
 
-def Tree(b: int) -> tuple:  # noqa: C901
+def Tree(b: int) -> tuple:
+    """Construct the training set for a QPNN that powers a tree-type photonic cluster state generation protocol.
+
+    ADD DOCUMENTATION HERE
+
+    Args:
+        b: maximum number of branches in the tree, $\\max\\left\\{\\vec{b}\\}$
+
+    Returns:
+        Tuple of three tuples, the first two of which are the input and target states resolved in the computational
+            basis for each $1 \\leq n \\leq b + 1$, the last of which contains the computational basis indices for each
+            unit cell operation that exists for each $n$
+    """
+
+    # define the number of photons and number of optical modes
+    assert b >= 2, "the smallest useful tree has at least one section with 2 or more branches"
+    n = b + 1
+    m = 2 * n
+
+    def build_tset_for_n(_n: int) -> tuple:
+        # define the relevant single-qubit states that will be used to construct each input in the computational basis
+        Id = np.eye(2, dtype=complex)
+        ket0 = Id[0].reshape(2, 1)
+        ket1 = Id[1].reshape(2, 1)
+        ketp = logic.H() @ ket0
+        ketm = logic.H() @ ket1
+
+        if _n == 1:
+            # if just one photon, it is |+> and should be routed through unchanged
+            psi_in = np.copy(ketp)
+            psi_targ = np.copy(ketp)
+            return psi_in.reshape(1, 2), psi_targ.reshape(1, 2)
+
+        else:
+            # if more than one photon, the circuit should apply CZ gates between the control (0) and all targets
+            CZs = [logic.CZ(control=0, target=i, n=_n) for i in range(1, _n)]
+            circuit = reduce(np.dot, CZs[::-1])
+
+            # build the training set, keeping in mind that the top qubit is |+> for all input states,
+            # and the other two qubits are swept over the X and Z computational bases
+            comp_basis = logic.build_comp_basis(_n - 1)
+            K = 2 * (comp_basis.shape[0])
+            psi_in = np.zeros((K, 2**_n), dtype=complex)
+            psi_targ = np.zeros((K, 2**_n), dtype=complex)
+            for i, basis in enumerate(["X", "Z"]):
+                for j, comp_state in enumerate(comp_basis):
+                    # construct input state in the computational basis, then get output by applying the circuit
+                    _psi_in = np.copy(ketp)
+                    for qubit in comp_state:
+                        if basis == "X":
+                            _psi_in = np.kron(_psi_in, ketp) if qubit == 0 else np.kron(_psi_in, ketm)
+                        elif basis == "Z":
+                            _psi_in = np.kron(_psi_in, ket0) if qubit == 0 else np.kron(_psi_in, ket1)
+                    psi_in[i * comp_basis.shape[0] + j] = _psi_in.reshape((2**_n,))
+                    psi_targ[i * comp_basis.shape[0] + j] = (circuit @ _psi_in).reshape((2**_n,))
+            return psi_in, psi_targ
+
+    def build_comp_indices_for_n(_n: int) -> np.ndarray:
+        # compute all combinations of empty qubit slots (2 modes each) for the given number of qubits/photons
+        empty_slot_combos = list(combinations(range(1, n), n - _n))
+
+        # for each combination, prepare a corresponding list of empty modes and use this to prepare the indices of the
+        # computational basis within the larger N-dimensional second quantization Fock basis
+        basis = build_secq_basis(_n, m)
+        comp_indices = np.zeros((len(empty_slot_combos), 2**_n), dtype=int)
+        for i, empty_slots in enumerate(empty_slot_combos):
+            if len(empty_slots) == 0:
+                empty_modes = None
+            else:
+                empty_modes = np.zeros(2 * len(empty_slots), dtype=int)
+                for j, slot in enumerate(empty_slots):
+                    empty_modes[2 * j] = 2 * slot
+                    empty_modes[2 * j + 1] = 2 * slot + 1
+            comp_indices[i] = comp_indices_from_secq(basis, ancillary_modes=empty_modes)
+        return comp_indices
+
+    # construct the full training set for each number of photons 1 <= n <= b + 1
+    psi_in = []
+    psi_targ = []
+    comp_indices = []
+    for _n in range(1, n + 1):
+        psi_in_n, psi_targ_n = build_tset_for_n(_n)
+        psi_in.append(psi_in_n)
+        psi_targ.append(psi_targ_n)
+        comp_indices.append(build_comp_indices_for_n(_n))
+    return psi_in, psi_targ, comp_indices
+
+
+def OldTree(b: int) -> tuple:  # noqa: C901
     """Construct the training set for a QPNN that powers a tree-type photonic cluster state generation protocol.
 
     ADD DOCUMENTATION HERE

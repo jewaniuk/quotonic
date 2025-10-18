@@ -10,7 +10,7 @@ from typing import Optional
 import jax.numpy as jnp
 import numpy as np
 from jax import jit, vmap
-from jax.tree import map as tree_map
+from jax.tree import map as tree_map, transpose as tree_transpose, structure as tree_structure
 from jax.typing import DTypeLike
 
 from quotonic.aa import SecqTransformer
@@ -19,6 +19,8 @@ from quotonic.fock import build_secq_basis, calc_firq_dim, calc_secq_dim
 from quotonic.nl import build_kerr, build_photon_mp
 from quotonic.types import jnp_ndarray
 from quotonic.utils import comp_indices_from_secq
+
+DEFAULT = None
 
 
 class QPNN:
@@ -299,7 +301,7 @@ class ImperfectQPNN(QPNN):
         self.ell_ps = ell_ps
         self.t_dc = t_dc
         self.meshes = tuple([Mesh(m) for _ in range(L)])
-        self.prep_meshes()
+        self.imperfections = DEFAULT
 
         # instantiate transfomer required for the multi-photon unitary transformations of the linear layers
         self.transformer = SecqTransformer(n, m)
@@ -336,31 +338,72 @@ class ImperfectQPNN(QPNN):
         self.psi_targ = jnp.asarray(tset[1])
         self.K = 0 if self.psi_in.size == 0 else self.psi_in.shape[0]
 
-    def prep_meshes(self) -> None:
-        """Prepare the Mach-Zehnder interferometer meshes for the linear layers of the network.
+    @property
+    def imperfections(self) -> tuple:
+        """Component-level imperfection values for each interferometer mesh in the QPNN.
+
+        Returns:
+            Tuple of arrays, the first of which is an $L\\times m\\times m$ array containing the percentage loss per
+                arm of each of the $L$ interferometer meshes, for each column of MZIs respectively; the second of
+                which is an $L\\times m$ array containing the percentage loss for each of the output phase shifters
+                in each of the $L$ interferometer meshes; the third of which is an $L\\times 2\\times m(m-1)/2$ array
+                containing the splitting ratio (T:R) of each directional coupler in each of the $L$ interferometer
+                meshes, organized such that each column corresponds to one MZI, the top row being the first
+                directional coupler and the bottom being the second, where the MZIs are ordered from top to bottom
+                followed by left to right across each mesh
+        """
+        ells_mzi = np.zeros((self.L, self.m, self.m), dtype=float)
+        ells_ps = np.zeros((self.L, self.m), dtype=float)
+        ts_dc = np.zeros((self.L, 2, self.m * (self.m - 1) // 2), dtype=float)
+        for i in range(self.L):
+            ells_mzi[i] = self.meshes[i].ell_mzi
+            ells_ps[i] = self.meshes[i].ell_ps
+            ts_dc[i] = self.meshes[i].t_dc
+        return ells_mzi, ells_ps, ts_dc
+
+    @imperfections.setter
+    def imperfections(self, imp: Optional[tuple]) -> None:
+        """Component-level imperfection values for each interferometer mesh in the QPNN.
 
         ADD DOCUMENTATION HERE
+
+        Args:
+            imp: Tuple of arrays, the first of which is an $L\\times m\\times m$ array containing the
+                percentage loss per arm of each of the $L$ interferometer meshes, for each column of MZIs
+                respectively; the second of which is an $L\\times m$ array containing the percentage loss for each of
+                the output phase shifters in each of the $L$ interferometer meshes; the third of which is an
+                $L\\times 2\\times m(m-1)/2$ array containing the splitting ratio (T:R) of each directional coupler
+                in each of the $L$ interferometer meshes, organized such that each column corresponds to one MZI,
+                the top row being the first directional coupler and the bottom being the second, where the MZIs are
+                ordered from top to bottom followed by left to right across each mesh; if None, then this function
+                will use the nominal imperfection attributes to generate the component-level imperfection values
         """
+        if imp is None:
+            # for each layer, compute and apply new loss and splitting ratio values from their respective distributions
+            ells_mzi = np.zeros((self.L, self.m, self.m), dtype=float)
+            ells_ps = np.zeros((self.L, self.m), dtype=float)
+            ts_dc = np.zeros((self.L, 2, self.m * (self.m - 1) // 2), dtype=float)
+            for i in range(self.L):
+                ells_mzi[i] = np.random.normal(
+                    1.0 - 10 ** (-0.1 * self.ell_mzi[0]),
+                    self.ell_mzi[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_mzi[0]),
+                    self.m ** 2,
+                ).reshape((self.m, self.m))
+                ells_ps[i] = np.random.normal(
+                    1.0 - 10 ** (-0.1 * self.ell_ps[0]),
+                    self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
+                    self.m,
+                )
+                ts_dc[i] = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
+                    (2, self.m * (self.m - 1) // 2)
+                )
+        else:
+            ells_mzi, ells_ps, ts_dc = imp
 
-        # for each layer, compute and apply new loss and splitting ratio values from their respective distributions
         for i in range(self.L):
-            ells_mzi = np.random.normal(
-                1.0 - 10 ** (-0.1 * self.ell_mzi[0]),
-                self.ell_mzi[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_mzi[0]),
-                self.m**2,
-            ).reshape((self.m, self.m))
-            ells_ps = np.random.normal(
-                1.0 - 10 ** (-0.1 * self.ell_ps[0]),
-                self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
-                self.m,
-            )
-            ts_dc = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
-                (2, self.m * (self.m - 1) // 2)
-            )
-
-            self.meshes[i].ell_mzi = jnp.asarray(ells_mzi)
-            self.meshes[i].ell_ps = jnp.asarray(ells_ps)
-            self.meshes[i].t_dc = jnp.asarray(ts_dc)
+            self.meshes[i].ell_mzi = jnp.asarray(ells_mzi[i])
+            self.meshes[i].ell_ps = jnp.asarray(ells_ps[i])
+            self.meshes[i].t_dc = jnp.asarray(ts_dc[i])
 
     @partial(jit, static_argnums=(0,))
     def build(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> jnp_ndarray:
@@ -472,6 +515,436 @@ class ImperfectQPNN(QPNN):
 
 
 class TreeQPNN(QPNN):
+    """Class for experimental modelling of QPNNs based on three-level system photon subtraction/addition nonlinearities
+    that power a tree-type photonic cluster state generation protocol.
+
+    ADD DOCUMENTATION HERE
+
+    Attributes:
+        n (int): number of photons, $n$
+        m (int): number of optical modes, $m$
+        L (int): number of layers, $L$
+        b (int): number of branches in the tree, $b$
+        N (int): dimension of the second quantization Fock basis for $n$ photons and $m$ optical modes
+        Ns (tuple): tuple of $b + 1$ dimensions of the second quantization Fock bases for $n$ photons and $m$ optical
+            modes for all $1 \\leq n \\leq b + 1$
+        meshes (tuple): tuple of $L$ objects containing methods that allow each linear layer (i.e. rectangular
+            Mach-Zehnder interferometer meshes) to be encoded
+        ell_mzi (tuple): nominal loss for a Mach-Zehnder interferometer in dB, where the first (second) element is the
+            mean (standard deviation) of a normal distribution from which those for each individual interferometer is
+            selected
+        ell_ps (tuple): nominal loss for a phase shifter in dB, where the first (second) element is the mean (standard
+            deviation) of a normal distribution from which those for each individual output phase shifter is selected
+        t_dc (tuple): directional coupler splitting ratios (T:R) as decimal values, where the first (second) element is
+            the mean (standard deviation) of a normal distribution from which those for each individual nominally 50:50
+            coupler is selected
+        transformers (tuple): tuple of $b + 1$ objects containing methods that compute multi-photon unitary
+            transformations of the linear layers for all $1 \\leq n \\leq b + 1$
+        varphi (tuple): tuple of the phase shifts applied to the subtracted photon, followed by that applied to the
+            remaining photons, for the 3LS photon $\\mp$ nonlinearity, in $\\text{rad}$, $(\\varphi_1, \\varphi2)$
+        nls (tuple): tuple of $b + 1$ $N\\times N$ arrays, the $b + 1$ matrix representations of a set of single-site
+            3LS photon $\\mp$ nonlinearities resolved in the Fock bases for all $1 \\leq n \\leq b + 1$
+        K (tuple): arrays containing the numbers of input-target state pairs in the QPNN training set for each
+            $1 \\leq n \\leq b + 1$, per unit cell operation, defaults to a tuple of zeros if none provided
+        psi_in (tuple): arrays containing the input states of the QPNN training set, resolved in the $2^n$-dimensional
+            computational bases, for each $1 \\leq n \\leq b + 1$, defaults to a tuple of empty arrays if none provided
+        psi_targ (tuple): arrays containing the target states of the QPNN training set, resolved in the
+            $2^n$-dimensional computational bases, for each $1 \\leq n \\leq b + 1$, defaults to a tuple of empty
+            arrays if none provided
+        comp_indices (tuple): arrays containing the indices of each second quantization Fock basis, for each
+            $1 \\leq n \\leq b + 1$, that correspond to each possible unit cell operation, defaults to a tuple of empty
+            arrays if none provided
+    """
+
+    def __init__(
+        self,
+        b: int,
+        L: int,
+        varphi: tuple = (0.0, np.pi),
+        ell_mzi: tuple = (0.0, 0.0),
+        ell_ps: tuple = (0.0, 0.0),
+        t_dc: tuple = (0.5, 0.0),
+        training_set: Optional[tuple] = None,
+    ) -> None:
+        """Initialization of a Tree QPNN instance.
+
+        ADD DOCUMENTATION HERE
+
+        Args:
+            b: number of branches in the tree, $b$
+            L: number of layers, $L$
+            varphi: tuple of the phase shifts applied to the subtracted photon, followed by that applied to the
+                remaining photons, for the 3LS photon $\\mp$ nonlinearity, in $\\text{rad}$, $(\\varphi_1, \\varphi2)$
+            ell_mzi: nominal loss for a Mach-Zehnder interferometer in dB, where the first (second) element is the mean
+                (standard deviation) of a normal distribution from which those for each individual interferometer is
+                selected
+            ell_ps: nominal loss for a phase shifter in dB, where the first (second) element is the mean (standard
+                deviation) of a normal distribution from which those for each individual output phase shifter is
+                selected
+            t_dc: directional coupler splitting ratios (T:R) as decimal values, where the first (second) element is the
+                mean (standard deviation) of a normal distribution from which those for each individual nominally 50:50
+                coupler is selected
+            training_set: tuple of three tuples, the first two of which are the input and target states resolved in
+                the computational basis for each $1 \\leq n \\leq b + 1$, the last of which contains the
+                computational basis indices for each unit cell operation that exists for each $n$
+        """
+
+        n = b + 1
+        m = 2 * n
+        self.b = b
+        super().__init__(n, m, L)
+
+        # instantiate L Clements meshes, with losses and routing errors, for encoding the linear layers
+        self.ell_mzi = ell_mzi
+        self.ell_ps = ell_ps
+        self.t_dc = t_dc
+        self.meshes = tuple([Mesh(m) for _ in range(L)])
+        self.imperfections = DEFAULT
+
+        # instantiate transfomers for the multi-photon unitary transformations of the layers, for all 1 <= n <= b + 1
+        transformers = []
+        Ns = []
+        for _n in range(1, n + 1):
+            transformers.append(SecqTransformer(_n, m))
+            Ns.append(transformers[-1].N)
+        self.transformers = tuple(transformers)
+        self.Ns = tuple(Ns)
+
+        # store nonlinear phase shifts, construct the 3LS photon -/+ nonlinear unitaries for all 1 <= n <= b + 1
+        self.varphi = varphi
+        nls = []
+        for _n in range(1, n + 1):
+            nls.append(jnp.asarray(build_photon_mp(_n, m, *varphi)))
+        self.nls = tuple(nls)
+
+        # prepare the training set attributes whether they were provided or not
+        self.training_set = training_set if training_set is not None else ((), (), ())
+
+    @property
+    def training_set(self) -> tuple:
+        """Training set for the unit cell generation functionality of the QPNN.
+
+        Returns:
+            Tuple of three tuples, the first two of which are the input and target states resolved in the
+                computational basis for each $1 \\leq n \\leq b + 1$, the last of which contains the computational
+                basis indices for each unit cell operation that exists for each $n$
+        """
+        return self.psi_in, self.psi_targ, self.comp_indices
+
+    @training_set.setter
+    def training_set(self, tset: tuple) -> None:
+        """Training set for the unit cell generation functionality of the QPNN.
+
+        Args:
+            tset: tuple of three tuples, the first two of which are the input and target states resolved in the
+                computational basis for each $1 \\leq n \\leq b + 1$, the last of which contains the computational
+                basis indices for each unit cell operation that exists for each $n$
+        """
+        if len(tset[0]) == 0:
+            psi_in = [jnp.array(())] * self.n
+            psi_targ = [jnp.array(())] * self.n
+            comp_indices = [jnp.array(())] * self.n
+            K = [0] * self.n
+        else:
+            psi_in = []
+            psi_targ = []
+            comp_indices = []
+            K = []
+            for i in range(self.n):
+                psi_in.append(jnp.asarray(tset[0][i]))
+                psi_targ.append(jnp.asarray(tset[1][i]))
+                comp_indices.append(jnp.asarray(tset[2][i]))
+                K.append(psi_in[-1].shape[0])
+
+        self.psi_in = tuple(psi_in)
+        self.psi_targ = tuple(psi_targ)
+        self.comp_indices = tuple(comp_indices)
+        self.K = tuple(K)
+
+    @property
+    def imperfections(self) -> tuple:
+        """Component-level imperfection values for each interferometer mesh in the QPNN.
+
+        Returns:
+            Tuple of arrays, the first of which is an $L\\times m\\times m$ array containing the percentage loss per
+                arm of each of the $L$ interferometer meshes, for each column of MZIs respectively; the second of
+                which is an $L\\times m$ array containing the percentage loss for each of the output phase shifters
+                in each of the $L$ interferometer meshes; the third of which is an $L\\times 2\\times m(m-1)/2$ array
+                containing the splitting ratio (T:R) of each directional coupler in each of the $L$ interferometer
+                meshes, organized such that each column corresponds to one MZI, the top row being the first
+                directional coupler and the bottom being the second, where the MZIs are ordered from top to bottom
+                followed by left to right across each mesh
+        """
+        ells_mzi = np.zeros((self.L, self.m, self.m), dtype=float)
+        ells_ps = np.zeros((self.L, self.m), dtype=float)
+        ts_dc = np.zeros((self.L, 2, self.m * (self.m - 1) // 2), dtype=float)
+        for i in range(self.L):
+            ells_mzi[i] = self.meshes[i].ell_mzi
+            ells_ps[i] = self.meshes[i].ell_ps
+            ts_dc[i] = self.meshes[i].t_dc
+        return ells_mzi, ells_ps, ts_dc
+
+    @imperfections.setter
+    def imperfections(self, imp: Optional[tuple]) -> None:
+        """Component-level imperfection values for each interferometer mesh in the QPNN.
+
+        ADD DOCUMENTATION HERE
+
+        Args:
+            imp: Tuple of arrays, the first of which is an $L\\times m\\times m$ array containing the
+                percentage loss per arm of each of the $L$ interferometer meshes, for each column of MZIs
+                respectively; the second of which is an $L\\times m$ array containing the percentage loss for each of
+                the output phase shifters in each of the $L$ interferometer meshes; the third of which is an
+                $L\\times 2\\times m(m-1)/2$ array containing the splitting ratio (T:R) of each directional coupler
+                in each of the $L$ interferometer meshes, organized such that each column corresponds to one MZI,
+                the top row being the first directional coupler and the bottom being the second, where the MZIs are
+                ordered from top to bottom followed by left to right across each mesh; if None, then this function
+                will use the nominal imperfection attributes to generate the component-level imperfection values
+        """
+        if imp is None:
+            # for each layer, compute and apply new loss and splitting ratio values from their respective distributions
+            ells_mzi = np.zeros((self.L, self.m, self.m), dtype=float)
+            ells_ps = np.zeros((self.L, self.m), dtype=float)
+            ts_dc = np.zeros((self.L, 2, self.m * (self.m - 1) // 2), dtype=float)
+            for i in range(self.L):
+                ells_mzi[i] = np.random.normal(
+                    1.0 - 10 ** (-0.1 * self.ell_mzi[0]),
+                    self.ell_mzi[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_mzi[0]),
+                    self.m ** 2,
+                ).reshape((self.m, self.m))
+                ells_ps[i] = np.random.normal(
+                    1.0 - 10 ** (-0.1 * self.ell_ps[0]),
+                    self.ell_ps[1] * 0.1 * np.log(10) * 10 ** (-0.1 * self.ell_ps[0]),
+                    self.m,
+                )
+                ts_dc[i] = np.random.normal(self.t_dc[0], self.t_dc[1], self.m * (self.m - 1)).reshape(
+                    (2, self.m * (self.m - 1) // 2)
+                )
+        else:
+            ells_mzi, ells_ps, ts_dc = imp
+
+        for i in range(self.L):
+            self.meshes[i].ell_mzi = jnp.asarray(ells_mzi[i])
+            self.meshes[i].ell_ps = jnp.asarray(ells_ps[i])
+            self.meshes[i].t_dc = jnp.asarray(ts_dc[i])
+
+    @partial(jit, static_argnums=(0,))
+    def build(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> tuple:
+        """Build matrix representations of the QPNN from all its layers and components, for operation on
+        $1 \\leq n \\leq b + 1$ photons.
+
+        ADD DOCUMENTATION HERE
+
+        Args:
+            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
+                ith layer
+            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
+                ith layer
+            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
+                of the mesh in the ith layer
+
+        Returns:
+            A tuple of $b + 1$ $N\\times N$ arrays, the matrix representations of the QPNN resolved in the
+                $N$-dimensional second quantization Fock bases for all $1 \\leq n \\leq b + 1$
+        """
+
+        # encode the single-photon unitary matrices for each linear layer in the Clements configuration
+        single_photon_Us = jnp.array(
+            [self.meshes[i].encode(phi[i], theta[i], delta[i]) for i in range(self.L)], dtype=complex
+        )
+
+        def n_photon_S(transformer: SecqTransformer, nl: jnp_ndarray, N: int) -> jnp_ndarray:
+            # perform the multi-photon unitary transformations for each linear layer
+            multi_photon_Us = vmap(transformer.transform)(single_photon_Us)
+
+            # for each linear layer up to the last one, multiply the nonlinear unitary and multi-photon unitary together
+            layers = vmap(lambda PhiU: nl @ PhiU)(multi_photon_Us[0 : self.L - 1])
+
+            # stack the layers together, including the final linear layer
+            layers = jnp.vstack((layers, multi_photon_Us[-1].reshape((1, N, N))))
+
+            # multiply all the layers together
+            Sn: jnp_ndarray = reduce(jnp.matmul, layers[::-1])
+            return Sn
+
+        # construct the matrix representations for all numbers of photons, 1 <= n <= b + 1
+        S: tuple = tree_map(n_photon_S, self.transformers, self.nls, self.Ns)
+
+        return S
+
+    @partial(jit, static_argnums=(0,))
+    def calc_cost(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> DTypeLike:
+        """Calculate the cost function for the QPNN.
+
+        ADD DOCUMENTATION HERE
+
+        Args:
+            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
+                ith layer
+            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
+                ith layer
+            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
+                of the mesh in the ith layer
+
+        Returns:
+            Cost (i.e. network error) of the QPNN
+        """
+
+        # check that a training set has been provided
+        assert self.K[0] > 0, "No training set was provided for the QPNN."
+
+        # construct the QPNN system function in all $N$-dimensional Fock bases for all 1 <= n <= b + 1
+        S = self.build(phi, theta, delta)
+
+        def n_photon_succ_rates(
+            Sn: jnp_ndarray,
+            psi_in_n: jnp_ndarray,
+            psi_targ_n: jnp_ndarray,
+            comp_inds_n: jnp_ndarray
+        ) -> jnp_ndarray:
+            @vmap
+            def n_photon_unit_cell_succ_rates(inds: jnp_ndarray) -> jnp_ndarray:
+                psi_out_n = vmap(lambda psi: Sn[jnp.ix_(inds, inds)] @ psi)(psi_in_n)
+                succ_uc = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(psi_targ_n, psi_out_n)
+                return succ_uc
+            succ_rates = n_photon_unit_cell_succ_rates(comp_inds_n)
+            return jnp.hstack(succ_rates)
+
+        # compute the success rates for each 1 <= n <= b + 1
+        succ_rates = tree_map(n_photon_succ_rates, S, self.psi_in, self.psi_targ, self.comp_indices)
+
+        # put everything together, take the mean, then calculate cost
+        cost = 1 - jnp.mean(jnp.hstack(succ_rates))
+
+        return cost
+
+    @partial(jit, static_argnums=(0,))
+    def calc_overall_performance_measures(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> tuple:
+        """Calculate the overall fidelity, success rate and logical rate of the QPNN.
+
+        ADD DOCUMENTATION HERE
+
+        Args:
+            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
+                ith layer
+            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
+                ith layer
+            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
+                of the mesh in the ith layer
+
+        Returns:
+            Tuple with overall fidelity, success rate, and logical rate of the QPNN
+        """
+
+        # check that a training set has been provided
+        assert self.K[0] > 0, "No training set was provided for the QPNN."
+
+        # construct the QPNN system function in all $N$-dimensional Fock bases for all 1 <= n <= b + 1
+        S = self.build(phi, theta, delta)
+
+        def measures(
+            Sn: jnp_ndarray,
+            psi_in_n: jnp_ndarray,
+            psi_targ_n: jnp_ndarray,
+            comp_inds_n: jnp_ndarray
+        ) -> tuple:
+            @vmap
+            def measures_per_unit_cell(inds: jnp_ndarray) -> tuple:
+                psi_out_n = vmap(lambda psi: Sn[jnp.ix_(inds, inds)] @ psi)(psi_in_n)
+                succ = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(psi_targ_n, psi_out_n)
+                logi = vmap(lambda psio: jnp.sum(jnp.abs(psio) ** 2))(psi_out_n)
+                return succ, logi
+
+            succ_rates, logi_rates = measures_per_unit_cell(comp_inds_n)
+            fids = succ_rates / logi_rates
+            return jnp.hstack(fids), jnp.hstack(succ_rates), jnp.hstack(logi_rates)
+
+        # map through the different numbers of photons and unit cell operations, evaluating performance on the way
+        meas = tree_map(
+            measures,
+            S,
+            self.psi_in,
+            self.psi_targ,
+            self.comp_indices
+        )
+        meas_T = tree_transpose(
+            outer_treedef=tree_structure(S),
+            inner_treedef=tree_structure(meas[0]),
+            pytree_to_transpose=meas,
+        )
+        fids, succ_rates, logi_rates = meas_T
+
+        # compute the overall fidelity, success rate & logical rate, including all operations in the mean
+        fid = jnp.mean(jnp.hstack(fids))
+        succ_rate = jnp.mean(jnp.hstack(succ_rates))
+        logi_rate = jnp.mean(jnp.hstack(logi_rates))
+
+        return fid, succ_rate, logi_rate
+
+    @partial(jit, static_argnums=(0,))
+    def calc_unit_cell_performance_measures(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> tuple:
+        """Calculate the fidelities, success rates and logical rates of the QPNN for each individual unit cell
+        operation required for tree formation.
+
+        Args:
+            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
+                ith layer
+            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
+                ith layer
+            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
+                of the mesh in the ith layer
+
+        Returns:
+            Tuple of three tuples, for fidelity, success rate and logical rate respectively, where for each measure
+                its own tuple is returned with elements corresponding to different photon numbers $1 \\leq n \\leq b
+                + 1$, and each element is an array that organizes the measure's value for each unit cell operation with
+                $n$ photons
+        """
+
+        # check that a training set has been provided
+        assert self.K[0] > 0, "No training set was provided for the QPNN."
+
+        # construct the QPNN system function in all $N$-dimensional Fock bases for all 1 <= n <= b + 1
+        S = self.build(phi, theta, delta)
+
+        def measures(
+            Sn: jnp_ndarray,
+            psi_in_n: jnp_ndarray,
+            psi_targ_n: jnp_ndarray,
+            comp_inds_n: jnp_ndarray
+        ) -> tuple:
+            @vmap
+            def measures_per_unit_cell(inds: jnp_ndarray) -> tuple:
+                psi_out_n = vmap(lambda psi: Sn[jnp.ix_(inds, inds)] @ psi)(psi_in_n)
+                succ_uc = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(psi_targ_n, psi_out_n)
+                logi_uc = vmap(lambda psio: jnp.sum(jnp.abs(psio) ** 2))(psi_out_n)
+                return succ_uc, logi_uc
+
+            succ_rates, logi_rates = measures_per_unit_cell(comp_inds_n)
+            succ_rate = vmap(lambda succ: jnp.mean(succ))(succ_rates)
+            logi_rate = vmap(lambda logi: jnp.mean(logi))(logi_rates)
+            fid = vmap(lambda succ, logi: jnp.mean(succ / logi))(succ_rates, logi_rates)
+            return fid, succ_rate, logi_rate
+
+        # map through the different numbers of photons and unit cell operations, evaluating performance on the way
+        meas = tree_map(
+            measures,
+            S,
+            self.psi_in,
+            self.psi_targ,
+            self.comp_indices
+        )
+        meas_T = tree_transpose(
+            outer_treedef=tree_structure(S),
+            inner_treedef=tree_structure(meas[0]),
+            pytree_to_transpose=meas,
+        )
+        fids, succ_rates, logi_rates = meas_T
+
+        return fids, succ_rates, logi_rates
+
+
+class OldTreeQPNN(QPNN):
     """Class for experimental modelling of QPNNs based on three-level system photon subtraction/addition nonlinearities
     that power a tree-type photonic cluster state generation protocol.
 
@@ -643,6 +1116,26 @@ class TreeQPNN(QPNN):
             self.meshes[i].ell_ps = jnp.asarray(ells_ps)
             self.meshes[i].t_dc = jnp.asarray(ts_dc)
 
+    def update_meshes(self, ell_mzi: jnp_ndarray, ell_ps: jnp_ndarray, t_dc: jnp_ndarray) -> None:
+        """Update the Mach-Zehnder interferometer meshes in the network to include specific imperfection values.
+
+        ADD DOCUMENTATION HERE
+
+        Args:
+            ell_mzi: $L\\times m\\times m$ array containing the percentage loss per arm of each of the $L$
+                interferometer meshes, for each column of MZIs respectively
+            ell_ps: $L\\times m$ array containing the percentage loss for each of the output phase shifters in each of
+                the $L$ interferometer meshes
+            t_dc: $L\\times 2\\times m(m-1)/2$ array containing the splitting ratio (T:R) of each directional coupler
+                in each of the $L$ interferometer meshes, organized such that each column corresponds to one MZI, the
+                top row being the first directional coupler and the bottom being the second, where the MZIs are ordered
+                from top to bottom followed by left to right across each mesh
+        """
+        for i in range(self.L):
+            self.meshes[i].ell_mzi = ell_mzi[i]
+            self.meshes[i].ell_ps = ell_ps[i]
+            self.meshes[i].t_dc = t_dc[i]
+
     @partial(jit, static_argnums=(0,))
     def build(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> tuple:
         """Build matrix representations of the QPNN from all its layers and components, for operation on
@@ -688,8 +1181,8 @@ class TreeQPNN(QPNN):
         return S
 
     @partial(jit, static_argnums=(0,))
-    def calc_unc_fidelity(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> DTypeLike:
-        """Calculate the full unconditional fidelity of the QPNN.
+    def calc_cost(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> DTypeLike:
+        """Calculate the cost function for the QPNN.
 
         ADD DOCUMENTATION HERE
 
@@ -702,7 +1195,7 @@ class TreeQPNN(QPNN):
                 of the mesh in the ith layer
 
         Returns:
-            Unconditional fidelity of the QPNN
+            Cost (i.e. network error) of the QPNN
         """
 
         # check that a training set has been provided
@@ -711,22 +1204,23 @@ class TreeQPNN(QPNN):
         # construct the QPNN system function in all $N$-dimensional Fock bases for all 1 <= n <= b + 1
         S = self.build(phi, theta, delta)
 
-        def n_photon_Fus(Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray) -> jnp_ndarray:
+        def n_photon_succ_rates(Sn: jnp_ndarray, psi_in_n: jnp_ndarray, psi_targ_n: jnp_ndarray) -> jnp_ndarray:
             psi_out_n = vmap(lambda psi: Sn @ psi)(psi_in_n)
-            Fus = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(psi_targ_n, psi_out_n)
-            return Fus
+            succ_rates = vmap(lambda psit, psio: jnp.abs(jnp.dot(jnp.conj(psit), psio)) ** 2)(psi_targ_n, psi_out_n)
+            return succ_rates
 
-        # compute the unconditional fidelities for each 1 <= n <= b + 1
-        Fus = tree_map(n_photon_Fus, S, self.psi_in, self.psi_targ)
+        # compute the success rates for each 1 <= n <= b + 1
+        succ_rates = tree_map(n_photon_succ_rates, S, self.psi_in, self.psi_targ)
 
-        # put everything together and take the mean
-        Fu = jnp.mean(jnp.hstack(Fus))
+        # put everything together, take the mean, then calculate cost
+        cost = 1 - jnp.mean(jnp.hstack(succ_rates))
 
-        return Fu
+        return cost
 
     @partial(jit, static_argnums=(0,))
     def calc_performance_measures(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> tuple:
-        """Calculate the unconditional fidelities, conditional fidelity, and logical rate of the QPNN.
+        """Calculate the overall fidelity, success rate and logical rate of the QPNN, as well as those for each unit
+        cell operation required for tree formation.
 
         Args:
             phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
