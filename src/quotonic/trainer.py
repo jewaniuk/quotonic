@@ -383,10 +383,7 @@ class ImperfectTrainer(Trainer):
             results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
                 np.asarray(Theta[i]) for i in range(3)
             ]
-            for i in range(self.qpnn.L):
-                results["ell_mzi"][trial][i] = self.qpnn.meshes[i].ell_mzi
-                results["ell_ps"][trial][i] = self.qpnn.meshes[i].ell_ps
-                results["t_dc"][trial][i] = self.qpnn.meshes[i].t_dc
+            results["ell_mzi"][trial], results["ell_ps"][trial], results["t_dc"][trial] = self.qpnn.imperfections
 
             print("")
 
@@ -457,8 +454,8 @@ class TreeTrainer(Trainer):
         Returns:
             Cost (i.e. network error) of the QPNN
         """
-        Fu_full = self.qpnn.calc_unc_fidelity(phi, theta, delta)
-        return 1 - Fu_full  # type: ignore
+        cost = self.qpnn.calc_cost(phi, theta, delta)
+        return cost  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
@@ -501,10 +498,10 @@ class TreeTrainer(Trainer):
 
         # prepare the results dictionary
         results = {
-            "Fu_full": np.empty((self.num_trials, self.num_epochs), dtype=float),
-            "Fu": np.empty((self.num_trials,), dtype=float),
-            "Fc": np.empty((self.num_trials,), dtype=float),
-            "rate": np.empty((self.num_trials,), dtype=float),
+            "cost": np.empty((self.num_trials, self.num_epochs), dtype=float),
+            "fid": np.empty((self.num_trials,), dtype=float),
+            "succ_rate": np.empty((self.num_trials,), dtype=float),
+            "logi_rate": np.empty((self.num_trials,), dtype=float),
             "phi": np.empty((self.num_trials, self.qpnn.L, self.qpnn.m * (self.qpnn.m - 1) // 2), dtype=float),
             "theta": np.empty((self.num_trials, self.qpnn.L, self.qpnn.m * (self.qpnn.m - 1) // 2), dtype=float),
             "delta": np.empty((self.num_trials, self.qpnn.L, self.qpnn.m), dtype=float),
@@ -535,31 +532,28 @@ class TreeTrainer(Trainer):
             # iterate through the epochs, optimizing the parameters at each iteration
             Theta = Theta0
             optstate = initial_optstate
-            Fu_full = np.zeros(self.num_epochs, dtype=float)
+            cost = np.zeros(self.num_epochs, dtype=float)
             C = 1.0
             for epoch in range(self.num_epochs):
                 C, Theta, optstate = self.update(*Theta, optstate)
-                Fu_full[epoch] = 1 - C  # type: ignore
+                cost[epoch] = C  # type: ignore
 
                 if epoch % self.print_every == 0:
-                    print(f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Full Unconditional Fidelity: {Fu_full[epoch]:.4g}")
+                    print(f"Epoch: {epoch:d} \t Cost: {C:.4e} \t Success Rate: {1 - cost[epoch]:.4g}")
 
             # compute performance measures of the trained QPNN
-            _, Fu, Fc, rate = self.qpnn.calc_performance_measures(*Theta)
-            print(f"COMPLETE! \t Cost: {C:.4e} \t Fu: {Fu:.4g} \t Fc: {Fc:.4g} \t Rate: {rate:.4g}")
+            fid, succ_rate, logi_rate = self.qpnn.calc_overall_performance_measures(*Theta)
+            print(f"COMPLETE! \t Cost: {C:.4e} \t Fid: {fid:.4g} \t Succ: {succ_rate:.4g} \t Logi: {logi_rate:.4g}")
 
             # store the results from this trial
-            results["Fu_full"][trial] = Fu_full
-            results["Fu"][trial] = Fu
-            results["Fc"][trial] = Fc
-            results["rate"][trial] = rate
+            results["cost"][trial] = cost
+            results["fid"][trial] = fid
+            results["succ_rate"][trial] = succ_rate
+            results["logi_rate"][trial] = logi_rate
             results["phi"][trial], results["theta"][trial], results["delta"][trial] = [
                 np.asarray(Theta[i]) for i in range(3)
             ]
-            for i in range(self.qpnn.L):
-                results["ell_mzi"][trial][i] = self.qpnn.meshes[i].ell_mzi
-                results["ell_ps"][trial][i] = self.qpnn.meshes[i].ell_ps
-                results["t_dc"][trial][i] = self.qpnn.meshes[i].t_dc
+            results["ell_mzi"][trial], results["ell_ps"][trial], results["t_dc"][trial] = self.qpnn.imperfections
 
             print("")
 
