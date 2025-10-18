@@ -30,7 +30,7 @@ def prep_gray_code(i: int) -> tuple[int, int]:
 
     Returns:
         the difference between the old Gray value and the new
-        the direction of the algorithm
+        the direction of the algorithm, either +1 or -1
     """
     old_gray = i ^ (i // 2)
     new_gray = (i + 1) ^ ((i + 1) // 2)
