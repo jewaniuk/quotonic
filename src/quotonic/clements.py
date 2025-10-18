@@ -18,7 +18,6 @@ interactions", *npj Quantum Inf* **11**, 142 (2025)](https://doi.org/10.1038/s41
 """
 
 from functools import partial, reduce
-from typing import Optional, Tuple
 
 import jax.numpy as jnp
 import numpy as np
@@ -54,9 +53,9 @@ class Mesh:
     def __init__(
         self,
         m: int,
-        ell_mzi: Optional[np_ndarray] = None,
-        ell_ps: Optional[np_ndarray] = None,
-        t_dc: Optional[np_ndarray] = None,
+        ell_mzi: np_ndarray | None,
+        ell_ps: np_ndarray | None,
+        t_dc: np_ndarray | None,
     ) -> None:
         """Initialization of a Mach-Zehnder interferometer mesh arranged in the Clements configuration.
 
@@ -402,7 +401,7 @@ class Mesh:
         U = loss @ ps_delta @ reduce(jnp.matmul, columns[::-1])
         return U
 
-    def decode(self, U: np_ndarray) -> Tuple[np_ndarray, np_ndarray, np_ndarray]:
+    def decode(self, U: np_ndarray) -> tuple[np_ndarray, np_ndarray, np_ndarray]:
         """Perform Clements decomposition on a square $m\\times m$ unitary matrix.
 
         Given some linear $m\\times m$ unitary transformation, where $m$ is the number of optical modes, this method
@@ -433,8 +432,9 @@ class Mesh:
                 \\boldsymbol{\\delta})$, to perform Clements decomposition on
 
         Returns:
-            Tuple of three arrays, containing phase shifts $\\boldsymbol{\\phi}$, $\\boldsymbol{\\theta}$,
-                $\\boldsymbol{\\delta}$ respectively, that yield $\\mathbf{U}$ when applied in the Clements mesh
+            phi: array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in the mesh
+            theta: array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in the mesh
+            delta: array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of the mesh
         """
 
         # check that U is m x m

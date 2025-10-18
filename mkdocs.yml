@@ -27,6 +27,7 @@ plugins:
         python:
           paths: [src]
           options:
+            docstring_style: google
             extra:
               show_object_full_path: true
               show_module_path: true
