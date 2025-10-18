@@ -2,14 +2,14 @@
 The `quotonic.utils` module includes ...
 """
 
-from typing import Optional
-
 import numpy as np
 from jax import vmap
 from jax.scipy.special import factorial
 
+from quotonic.types import np_ndarray
 
-def genHaarUnitary(m: int) -> np.ndarray:
+
+def genHaarUnitary(m: int) -> np_ndarray:
     """Generate an $m\\times m$ unitary sampled randomly from the Haar measure.
 
     This function follows the procedure outlined in [F. Mezzadri, “How to generate random matrices from classical
@@ -26,11 +26,11 @@ def genHaarUnitary(m: int) -> np.ndarray:
     q, r = np.linalg.qr(z)
     d = np.diag(r)
     Lambda = d / np.abs(d)
-    U: np.ndarray = np.multiply(q, Lambda)
+    U: np_ndarray = np.multiply(q, Lambda)
     return U
 
 
-def comp_to_secq(comp_state: np.ndarray) -> np.ndarray:
+def comp_to_secq(comp_state: np_ndarray) -> np_ndarray:
     """Convert a computational basis state to its corresponding second-quantized Fock basis state in dual-rail encoding.
 
     ADD DOCUMENTATION HERE
@@ -57,7 +57,7 @@ def comp_to_secq(comp_state: np.ndarray) -> np.ndarray:
     return fock_state
 
 
-def secq_to_comp(fock_state: np.ndarray) -> np.ndarray:
+def secq_to_comp(fock_state: np_ndarray) -> np_ndarray:
     """Convert a Fock basis state, that is dual-rail encoded, to its corresponding computational basis state.
 
     ADD DOCUMENTATION HERE
@@ -85,7 +85,7 @@ def secq_to_comp(fock_state: np.ndarray) -> np.ndarray:
     return comp_state
 
 
-def comp_indices_from_secq(fock_basis: np.ndarray, ancillary_modes: Optional[np.ndarray] = None) -> np.ndarray:
+def comp_indices_from_secq(fock_basis: np_ndarray, ancillary_modes: np_ndarray | None = None) -> np_ndarray:
     """Extract the indices of Fock basis states that correspond to computational basis states by dual-rail encoding.
 
     ADD DOCUMENTATION HERE

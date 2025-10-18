@@ -16,7 +16,6 @@ Inf* **11**, 142 (2025)](https://doi.org/10.1038/s41534-025-01096-9).
 """
 
 from functools import partial
-from typing import Tuple
 
 import jax.numpy as jnp
 from jax import jit, vmap
@@ -27,7 +26,7 @@ from quotonic.types import jnp_ndarray
 from quotonic.utils import vectorial_factorial
 
 
-def gen_basis_combos(basis: jnp_ndarray) -> Tuple[jnp_ndarray, jnp_ndarray]:
+def gen_basis_combos(basis: jnp_ndarray) -> tuple[jnp_ndarray, jnp_ndarray]:
     """Generate combinations of basis states corresponding to each element of a matrix resolved in the basis.
 
     By placing the elements of the two tuples next to each other, you end up with (row, column) combinations for each
@@ -37,8 +36,8 @@ def gen_basis_combos(basis: jnp_ndarray) -> Tuple[jnp_ndarray, jnp_ndarray]:
         basis: $N\\times x$ array that catalogs all states in the $N$-dimensional basis, where each state has $x$ labels
 
     Returns:
-        Tuple of $N^2\\times x$ arrays, the first of which repeats each state $N$ times vertically before moving to
-            the next state, the second of which repeats the entire basis in the order given $N$ times
+        an $N^2\\times x$ array where each state is repeated $N$ times vertically before moving to the next
+        an $N^2\\times x$ array where the entire basis is repeated in the order given $N$ times
     """
     N = jnp.shape(basis)[0]
     return jnp.repeat(basis, N, axis=0), jnp.vstack([basis] * N)
@@ -76,7 +75,7 @@ class SecqTransformer:
     Attributes:
         n (int): number of photons, $n$
         N (int): dimension of the second quantization Fock basis for $n$ photons and $m$ optical modes
-        firq_combos (Tuple[jnp_ndarray, jnp_ndarray]): tuple of $N^2\\times n$ arrays, the first of which repeats each
+        firq_combos (tuple[jnp_ndarray, jnp_ndarray]): tuple of $N^2\\times n$ arrays, the first of which repeats each
             first-quantized state $N$ times vertically before moving to the next state, the second of which repeats the
             entire first-quantized basis (without indistinguishable duplicates) in the order given $N$ times; defaults
             to a tuple of empty arrays if $n = 1$

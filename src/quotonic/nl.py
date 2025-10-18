@@ -10,8 +10,6 @@ Approach to Neural Networks (CasOptAx)](https://github.com/JasvithBasani/CasOptA
 interactions", *npj Quantum Inf* **11**, 142 (2025)](https://doi.org/10.1038/s41534-025-01096-9).
 """
 
-from typing import Optional
-
 import numpy as np
 
 from quotonic.fock import build_firq_basis, build_secq_basis
@@ -23,7 +21,7 @@ def build_kerr(
     m: int,
     varphi: float | np_ndarray,
     basis_type: str = "secq",
-    burnout_map: Optional[np_ndarray] = None,
+    burnout_map: np_ndarray | None = None,
 ) -> np_ndarray:
     """Construct the diagonal nonlinear Kerr unitary in the relevant basis.
 

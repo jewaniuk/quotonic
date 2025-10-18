@@ -20,7 +20,7 @@ from quotonic.types import jnp_ndarray
 
 
 @vmap
-def prep_gray_code(i: int) -> tuple:
+def prep_gray_code(i: int) -> tuple[int, int]:
     """Preparation of Gray code for computing matrix permanents.
 
     This function is wrapped with `jax.vmap` such that it can be used vectorially.
@@ -29,8 +29,8 @@ def prep_gray_code(i: int) -> tuple:
         i: index typically used in loops that prepare Gray code
 
     Returns:
-        A tuple including the difference between the old Gray value and the new, followed by the direction of the
-            algorithm
+        the difference between the old Gray value and the new
+        the direction of the algorithm
     """
     old_gray = i ^ (i // 2)
     new_gray = (i + 1) ^ ((i + 1) // 2)
