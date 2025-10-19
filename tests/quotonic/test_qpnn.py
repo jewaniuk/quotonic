@@ -2,8 +2,9 @@ import jax.numpy as jnp
 import numpy as np
 
 from quotonic.qpnn import IdealQPNN, ImperfectQPNN, TreeQPNN
-from quotonic.training_sets import CNOT, BSA, Tree
+from quotonic.training_sets import BSA, CNOT, Tree
 from quotonic.utils import genHaarUnitary
+
 
 def test_IdealQPNN():
     n = 2
@@ -36,7 +37,6 @@ def test_ImperfectQPNN():
     training_set = BSA()
     qpnn = ImperfectQPNN(n, m, L, ell_mzi=ell_mzi, ell_ps=ell_ps, t_dc=t_dc, training_set=training_set)
 
-    m = 2 * (b + 1)
     phi, theta, delta = (
         np.zeros((L, m * (m - 1) // 2), dtype=float),
         np.zeros((L, m * (m - 1) // 2), dtype=float),
@@ -83,6 +83,6 @@ def test_TreeQPNN():
 
     F, succ_rate, logi_rate = qpnn.calc_unit_cell_performance_measures(*phases)
     for i in range(qpnn.n):
-        assert not np.isnan(F[i])
-        assert not np.isnan(succ_rate[i])
-        assert not np.isnan(logi_rate[i])
+        assert not np.isnan(F[i]).any()
+        assert not np.isnan(succ_rate[i]).any()
+        assert not np.isnan(logi_rate[i]).any()

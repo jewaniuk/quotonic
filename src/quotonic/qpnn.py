@@ -86,7 +86,7 @@ from quotonic.aa import SecqTransformer
 from quotonic.clements import Mesh
 from quotonic.fock import build_secq_basis, calc_firq_dim, calc_secq_dim
 from quotonic.nl import build_kerr, build_photon_mp
-from quotonic.types import np_ndarray, jnp_ndarray
+from quotonic.types import jnp_ndarray, np_ndarray
 from quotonic.utils import comp_indices_from_secq
 
 DEFAULT = None
@@ -550,10 +550,7 @@ class ImperfectQPNN(QPNN):
 
     @partial(jit, static_argnums=(0,))
     def calc_performance_measures(
-        self,
-        phi: jnp_ndarray,
-        theta: jnp_ndarray,
-        delta: jnp_ndarray
+        self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray
     ) -> tuple[DTypeLike, DTypeLike, DTypeLike]:
         """Calculate the unconditional fidelity, conditional fidelity, and logical rate of the QPNN.
 
@@ -924,10 +921,7 @@ class TreeQPNN(QPNN):
 
     @partial(jit, static_argnums=(0,))
     def calc_overall_performance_measures(
-        self,
-        phi: jnp_ndarray,
-        theta: jnp_ndarray,
-        delta: jnp_ndarray
+        self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray
     ) -> tuple[DTypeLike, DTypeLike, DTypeLike]:
         """Calculate the overall fidelity, success rate and logical rate of the QPNN.
 
@@ -988,10 +982,7 @@ class TreeQPNN(QPNN):
 
     @partial(jit, static_argnums=(0,))
     def calc_unit_cell_performance_measures(
-        self,
-        phi: jnp_ndarray,
-        theta: jnp_ndarray,
-        delta: jnp_ndarray
+        self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray
     ) -> tuple[tuple, tuple, tuple]:
         """Calculate the fidelities, success rates and logical rates of the QPNN for each individual unit cell
         operation required for tree formation.
