@@ -28,6 +28,9 @@ plugins:
           paths: [src]
           options:
             docstring_style: google
+            members_order: source
+            group_by_category: false
+            show_root_toc_entry: false
             extra:
               show_object_full_path: true
               show_module_path: true
@@ -35,6 +38,14 @@ theme:
   name: material
   feature:
     tabs: true
+  features:
+    - navigation.sections
+    - navigation.tracking
+    - toc.integrate                 # keeps on-page ToC integrated
+    - navigation.instant
+    - navigation.top
+    - navigation.tabs
+    - navigation.prune
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -73,6 +84,7 @@ extra_javascript:
 
 extra_css:
   - https://unpkg.com/katex@0/dist/katex.min.css
+  - styles/extra.css
 
 #extra_javascript:
 #  - https://polyfill.io/v3/polyfill.min.js?features=es6

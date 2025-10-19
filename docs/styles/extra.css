@@ -1,0 +1,25 @@
+/* --- Scroll-tracking active item (sidebar) --- */
+.md-nav__link--active {
+  color: var(--md-accent-fg-color) !important;
+}
+
+/* Make the top-right header items align right */
+.md-header__inner {
+  display: flex;
+  align-items: center;
+}
+
+/* Set explicit order: GitHub first, palette toggle second */
+.md-header__source {
+  order: 1;
+}
+
+.md-header__option {
+  order: 2;
+}
+
+/* Add a small gap between them */
+.md-header__option > * + *,
+.md-header__source > * + * {
+  margin-left: -2rem;
+}
