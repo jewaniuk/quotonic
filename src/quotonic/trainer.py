@@ -1,10 +1,31 @@
 """
-The `quotonic.trainer` module includes ...
-give a very general description here of how the training works, can copy from the tree manuscript
-if we describe everything here, then the remaining documentation can just focus on additions/extensions to the model
-"""
+The `quotonic.trainer` module includes classes that contain methods required to train the respective quantum photonic
+neural network (QPNN) models defined in [qpnn](qpnn.md). `Trainer` serves as a template class and thus includes
+attributes and methods that are relevant to training any model. The other trainer classes inherit `Trainer` and build
+from it, yet remain organized similarly to each other in many ways, as will be discussed further below.
 
-from typing import Optional, Tuple
+When training a QPNN, the goal is to minimize the network cost function by adjusting the variational phase shift
+parameters throughout the network architecture. Since most functionalities in `quotonic` are written for use with
+`jax`, we naturally turn to the version of `autograd` native to jax for gradient computation, and manage optimization
+trials using `optax`. Currently, we typically apply the default [Adam optimizer](https://arxiv.org/abs/1412.6980) and
+exponential decay scheduler from `optax`, as inspired by [Cascaded Optical Systems Approach to Neural Networks (
+CasOptAx)]( https://github.com/JasvithBasani/CasOptAx) as originally designed for use in [J. R. Basani *et al*.,
+"Universal logical quantum photonic neural network processor via cavity-assisted interactions", *npj Quantum Inf*
+**11**, 142 (2025)](https://doi.org/10.1038/s41534-025-01096-9).
+
+When performing a QPNN training simulation, we typically attempt to train network models in a set number of
+optimization trials, each proceeding for a set number of training epochs. Each optimization trial
+begins by  selecting random linear unitary transformations from the Haar measure, for each layer, and performing
+Clements  decomposition (see [clements](clements.md)) to extract the initial phase shift parameters. This has been
+shown in [S. Pai *et al*., "Matrix Optimization on Universal Unitary Photonic Devices", *Phys. Rev. Appl.* **11**,
+064044 (2019)](https://doi.org/10.1103/PhysRevApplied.11.064044) to improve convergence speed. From the initial
+parameters, the cost function can be evaluated, its gradients computed, and the results used to iteratively update
+the parameters each epoch (see `update` method in each class). At the end, the results of each trial are saved to a
+dictionary which is returned upon the completion of all trials (see `train` method in each class).
+
+If you decide to use `quotonic` to perform research on QPNNs, feel free to develop a trainer class to go with your
+QPNN model. Also, we'd be happy to add it if it fits the format appropriately, so please reach out!
+"""
 
 import jax.numpy as jnp
 import numpy as np
@@ -21,7 +42,11 @@ from quotonic.utils import genHaarUnitary
 class Trainer:
     """Base class for a quantum photonic neural network (QPNN) trainer.
 
-    ADD DOCUMENTATION HERE
+    This is effectively a template that prepares the fundamental attributes and methods for any QPNN trainer. Each
+    trainer is designed to run a set number of optimization trials, each proceeding for a set number of epochs,
+    with the option to print updates in a chosen interval of epochs. Also, each optimization trial will require a
+    starting point, and the `initialize_params` method uses the provided `Mesh` instance upon initialization to help
+    prepare these initial guesses easily.
 
     Attributes:
         num_trials (int): number of training trials to run
@@ -31,7 +56,7 @@ class Trainer:
             meshes) to be encoded and decoded, passed up from child class, otherwise defaults to a 4-mode mesh
     """
 
-    def __init__(self, num_trials: int, num_epochs: int, print_every: int = 10, mesh: Optional[Mesh] = None) -> None:
+    def __init__(self, num_trials: int, num_epochs: int, print_every: int = 10, mesh: Mesh | None = None) -> None:
         """Initialization of a Trainer instance.
 
         Args:
@@ -48,15 +73,22 @@ class Trainer:
         self.print_every = print_every
         self.mesh = mesh if mesh is not None else Mesh(4)
 
-    def initialize_params(self, L: int) -> Tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray]:
+    def initialize_params(self, L: int) -> tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray]:
         """Initialize the phase shift parameters of a QPNN randomly.
+
+        See the training description at the top of this module for more details. Here, $L$ is the number of layers in
+        the QPNN and $m$ is the number of optical modes.
 
         Args:
             L: number of layers in the QPNN
 
         Returns:
-            A tuple containing arrays of the $\\phi$ ($L\\times m(m-1) / 2$), $\\theta$ ($L\\times m(m-1) / 2$), and
-                $\\delta$ ($L\\times m$) phase shifts for each component of the QPNN
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
         """
 
         # generate a random unitary from the Haar measure for each layer, and perform Clements decomposition
@@ -76,8 +108,6 @@ class Trainer:
 
 class IdealTrainer(Trainer):
     """Class for training idealized QPNNs based on single-site Kerr-like nonlinearities.
-
-    ADD DOCUMENTATION HERE
 
     Attributes:
         num_trials (int): number of training trials to run
@@ -102,11 +132,12 @@ class IdealTrainer(Trainer):
     ) -> None:
         """Initialization of an Ideal Trainer instance.
 
-        ADD DOCUMENTATION HERE
+        The exponential decay scheduler and optimizer are initialized here, so desired settings should be passed upon
+        initialization if they differ from the default options.
 
         Args:
             qpnn: object containing methods to construct the transfer function enacted by a QPNN, and compute the
-                network fidelity
+                network cost function
             num_trials: number of training trials to run
             num_epochs: number of training epochs to run
             print_every: specifies how often results should be printed, in terms of epochs
@@ -126,40 +157,48 @@ class IdealTrainer(Trainer):
     def cost(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> DTypeLike:
         """Evaluate the cost function that is minimized during training.
 
+        See `[qpnn](qpnn.md)` for more details on the cost function.
+
         Args:
-            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
-                of the mesh in the ith layer of the QPNN being trained
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
 
         Returns:
-            Cost (i.e. network error) of the QPNN
+            C: cost (i.e. network error) of the QPNN
         """
         F = self.qpnn.calc_fidelity(phi, theta, delta)
         return 1 - F  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
-    ) -> Tuple[DTypeLike, Tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray], optax.OptState]:
+    ) -> tuple[DTypeLike, tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray], optax.OptState]:
         """Adjust the variational parameters to minimize the cost function.
 
-        ADD DOCUMENTATION HERE
+        This method wraps around the `cost` function to evaluate it and its gradients with respect to the variational
+        phase shift parameters. The updates to the parameters are computed using the attribute that stores the
+        optimizer, then applied to the parameters which are subsequently returned alongside the value of the cost
+        function and the state of the optimizer.
 
         Args:
-            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
-                of the mesh in the ith layer of the QPNN being trained
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
             optstate: current state of the optimizer
 
         Returns:
-            A tuple including the current value of the cost function, another tuple of the current parameters ($\\phi$,
-                $\\theta$, $\\delta$), and the current state of the optimizer
+            C: cost (i.e. network error) of the QPNN
+            Theta: tuple `(phi, theta, delta)` including arrays that store the updated phase shift parameters
+                $(\\boldsymbol{\\phi}, \\boldsymbol{\\theta}, \\boldsymbol{\\delta})$
+            optstate: updated state of the optimizer
         """
+
         # calculate cost function and its gradient with respect to the 0th, 1st, 2nd parameters,
         # which are phi, theta, delta respectively
         C, grads = value_and_grad(self.cost, argnums=(0, 1, 2))(phi, theta, delta)
@@ -173,10 +212,23 @@ class IdealTrainer(Trainer):
     def train(self) -> dict:
         """Train the QPNN in a number of trials.
 
-        ADD DOCUMENTATION HERE
+        A dictionary of results is first defined and initialized, then it is iteratively filled by training the given
+        QPNN model in the given number of trials. Each trial, the phase shift parameters are initialized alongside
+        the state of the optimizer, then the parameters are updated iteratively over the given number of epochs.
+        Updates may be printed during training at set intervals of epochs, and at the end of each trial a summary
+        statement is printed as well.
 
         Returns:
-            Dictionary that contains the relevant results of the training simulation (needs more documentation)
+            Dictionary that contains the relevant results of the training simulation
+
+                - **"F"** (`np_ndarray`): array of network fidelities at each trial and epoch, with shape `(num_trials,
+                    num_epochs)`
+                - **"phi"** (`np_ndarray`): array of optimized phase shifts $\\boldsymbol{\\phi}$ for all training
+                    trials, with shape `(num_trials, L, m * (m - 1) // 2)`
+                - **"theta"** (`np_ndarray`) array of optimized phase shifts $\\boldsymbol{\\theta}$ for all training
+                    trials, with shape `(num_trials, L, m * (m - 1) // 2)`
+                - **"delta"** (`np_ndarray`) array of optimized phase shifts $\\boldsymbol{\\delta}$ for all training
+                    trials, with shape `(num_trials, L, m)`
         """
 
         # prepare the results dictionary
@@ -221,8 +273,6 @@ class IdealTrainer(Trainer):
 class ImperfectTrainer(Trainer):
     """Class for training imperfect QPNNs based on single-site Kerr-like nonlinearities.
 
-    ADD DOCUMENTATION HERE
-
     Attributes:
         num_trials (int): number of training trials to run
         num_epochs (int): number of training epochs to run
@@ -246,7 +296,8 @@ class ImperfectTrainer(Trainer):
     ) -> None:
         """Initialization of an Imperfect Trainer instance.
 
-        ADD DOCUMENTATION HERE
+        The exponential decay scheduler and optimizer are initialized here, so desired settings should be passed upon
+        initialization if they differ from the default options.
 
         Args:
             qpnn: object containing methods to construct the transfer function enacted by a QPNN, and compute the
@@ -270,42 +321,48 @@ class ImperfectTrainer(Trainer):
     def cost(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> DTypeLike:
         """Evaluate the cost function that is minimized during training.
 
-        ADD DOCUMENTATION HERE
+        See `[qpnn](qpnn.md)` for more details on the cost function.
 
         Args:
-            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the ith
-                layer of the QPNN being trained
-            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
-                of the mesh in the ith layer of the QPNN being trained
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
 
         Returns:
-            Cost (i.e. network error) of the QPNN
+            C: cost (i.e. network error) of the QPNN
         """
         Fu = self.qpnn.calc_unc_fidelity(phi, theta, delta)
         return 1 - Fu  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
-    ) -> Tuple[DTypeLike, Tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray], optax.OptState]:
+    ) -> tuple[DTypeLike, tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray], optax.OptState]:
         """Adjust the variational parameters to minimize the cost function.
 
-        ADD DOCUMENTATION HERE
+        This method wraps around the `cost` function to evaluate it and its gradients with respect to the variational
+        phase shift parameters. The updates to the parameters are computed using the attribute that stores the
+        optimizer, then applied to the parameters which are subsequently returned alongside the value of the cost
+        function and the state of the optimizer.
 
         Args:
-            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
-                of the mesh in the ith layer of the QPNN being trained
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
             optstate: current state of the optimizer
 
         Returns:
-            A tuple including the current value of the cost function, another tuple of the current parameters ($\\phi$,
-                $\\theta$, $\\delta$), and the current state of the optimizer
+            C: cost (i.e. network error) of the QPNN
+            Theta: tuple `(phi, theta, delta)` including arrays that store the updated phase shift parameters
+                $(\\boldsymbol{\\phi}, \\boldsymbol{\\theta}, \\boldsymbol{\\delta})$
+            optstate: updated state of the optimizer
         """
+
         # calculate cost function and its gradient with respect to the 0th, 1st, 2nd parameters,
         # which are phi, theta,delta respectively
         C, grads = value_and_grad(self.cost, argnums=(0, 1, 2))(phi, theta, delta)
@@ -319,10 +376,33 @@ class ImperfectTrainer(Trainer):
     def train(self) -> dict:
         """Train the QPNN in a number of trials.
 
-        ADD DOCUMENTATION HERE
+        A dictionary of results is first defined and initialized, then it is iteratively filled by training the given
+        QPNN model in the given number of trials. Each trial, the phase shift parameters are initialized alongside
+        the state of the optimizer, then the parameters are updated iteratively over the given number of epochs.
+        Updates may be printed during training at set intervals of epochs, and at the end of each trial a summary
+        statement is printed as well.
 
         Returns:
-            Dictionary that contains the relevant results of the training simulation (needs more documentation)
+            Dictionary that contains the relevant results of the training simulation
+
+                - **"Fu"** (`np_ndarray`): array of network unconditional fidelities at each trial and epoch,
+                    with shape `(num_trials, num_epochs)`
+                - **"Fc"** (`np_ndarray`): array of network conditional fidelities measured at the end of each trial,
+                    with shape `(num_trials,)`
+                - **"rate"** (`np_ndarray`): array of network logical rates measured at the end of each trial,
+                    with shape `(num_trials,)`
+                - **"phi"** (`np_ndarray`): array of optimized phase shifts $\\boldsymbol{\\phi}$ for all training
+                    trials, with shape `(num_trials, L, m * (m - 1) // 2)`
+                - **"theta"** (`np_ndarray`) array of optimized phase shifts $\\boldsymbol{\\theta}$ for all training
+                    trials, with shape `(num_trials, L, m * (m - 1) // 2)`
+                - **"delta"** (`np_ndarray`) array of optimized phase shifts $\\boldsymbol{\\delta}$ for all training
+                    trials, with shape `(num_trials, L, m)`
+                - **"ell_mzi"** (`np_ndarray`) array of fractional losses per arm of each MZI in each QPNN trained in
+                    each trial, with shape `(num_trials, L, m, m)`
+                - **"ell_ps"** (`np_ndarray`) array of fractional losses per mesh output phase shifter in each QPNN
+                    trained in each trial, with shape `(num_trials, L, m)`
+                - **"t_dc"** (`np_ndarray`) array of directional coupler splitting ratios (T:R) throughout each QPNN
+                    trained in each trial, with shape `(num_trials, L, 2, m * (m - 1) // 2)`
         """
 
         # prepare the results dictionary
@@ -394,8 +474,6 @@ class TreeTrainer(Trainer):
     """Class for training imperfect QPNNs based on three-level system photon subtraction/addition nonlinearities that
     power a tree-type photonic cluster state generation protocol.
 
-    ADD DOCUMENTATION HERE
-
     Attributes:
         num_trials (int): number of training trials to run
         num_epochs (int): number of training epochs to run
@@ -419,7 +497,8 @@ class TreeTrainer(Trainer):
     ) -> None:
         """Initialization of a Tree Trainer instance.
 
-        ADD DOCUMENTATION HERE
+        The exponential decay scheduler and optimizer are initialized here, so desired settings should be passed upon
+        initialization if they differ from the default options.
 
         Args:
             qpnn: object containing methods to construct the transfer function enacted by a QPNN, and compute the
@@ -443,40 +522,48 @@ class TreeTrainer(Trainer):
     def cost(self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray) -> DTypeLike:
         """Evaluate the cost function that is minimized during training.
 
+        See `[qpnn](qpnn.md)` for more details on the cost function.
+
         Args:
-            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the output
-                of the mesh in the ith layer of the QPNN being trained
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
 
         Returns:
-            Cost (i.e. network error) of the QPNN
+            C: cost (i.e. network error) of the QPNN
         """
         cost = self.qpnn.calc_cost(phi, theta, delta)
         return cost  # type: ignore
 
     def update(
         self, phi: jnp_ndarray, theta: jnp_ndarray, delta: jnp_ndarray, optstate: optax.OptState
-    ) -> Tuple[DTypeLike, Tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray], optax.OptState]:
+    ) -> tuple[DTypeLike, tuple[jnp_ndarray, jnp_ndarray, jnp_ndarray], optax.OptState]:
         """Adjust the variational parameters to minimize the cost function.
 
-        ADD DOCUMENTATION HERE
+        This method wraps around the `cost` function to evaluate it and its gradients with respect to the variational
+        phase shift parameters. The updates to the parameters are computed using the attribute that stores the
+        optimizer, then applied to the parameters which are subsequently returned alongside the value of the cost
+        function and the state of the optimizer.
 
         Args:
-            phi: $L\\times m(m-1)/2$ phase shifts, $\\phi$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            theta: $L\\times m(m-1)/2$ phase shifts, $\\theta$, where the ith row contains those for each MZI in the
-                ith layer of the QPNN being trained
-            delta: $L\\times m$ phase shifts, $\\delta$, where the ith row contains those for each mode at the
-                output of the mesh in the ith layer of the QPNN being trained
+            phi: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\phi}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            theta: $L\\times m(m-1)/2$ array of phase shifts, $\\boldsymbol{\\theta}$, for all MZIs in each of the $L$
+                meshes in the QPNN
+            delta: $L\\times m$ array of phase shifts, $\\boldsymbol{\\delta}$, applied in each mode at the output of
+                each of the $L$ meshes in the QPNN
             optstate: current state of the optimizer
 
         Returns:
-            A tuple including the current value of the cost function, another tuple of the current parameters ($\\phi$,
-                $\\theta$, $\\delta$), and the current state of the optimizer
+            C: cost (i.e. network error) of the QPNN
+            Theta: tuple `(phi, theta, delta)` including arrays that store the updated phase shift parameters
+                $(\\boldsymbol{\\phi}, \\boldsymbol{\\theta}, \\boldsymbol{\\delta})$
+            optstate: updated state of the optimizer
         """
+
         # calculate cost function and its gradient with respect to the 0th, 1st, 2nd parameters,
         # which are phi, theta, delta respectively
         C, grads = value_and_grad(self.cost, argnums=(0, 1, 2))(phi, theta, delta)
@@ -490,10 +577,35 @@ class TreeTrainer(Trainer):
     def train(self) -> dict:
         """Train the QPNN in a number of trials.
 
-        ADD DOCUMENTATION HERE
+        A dictionary of results is first defined and initialized, then it is iteratively filled by training the given
+        QPNN model in the given number of trials. Each trial, the phase shift parameters are initialized alongside
+        the state of the optimizer, then the parameters are updated iteratively over the given number of epochs.
+        Updates may be printed during training at set intervals of epochs, and at the end of each trial a summary
+        statement is printed as well.
 
         Returns:
-            Dictionary that contains the relevant results of the training simulation (needs more documentation)
+            Dictionary that contains the relevant results of the training simulation
+
+                - **"cost"** (`np_ndarray`): array of network cost function values at each trial and epoch,
+                    with shape `(num_trials, num_epochs)`
+                - **"fid"** (`np_ndarray`): array of network fidelities measured at the end of each trial,
+                    with shape `(num_trials,)`
+                - **"succ_rate"** (`np_ndarray`): array of network success rates measured at the end of each trial,
+                    with shape `(num_trials,)`
+                - **"logi_rate"** (`np_ndarray`): array of network logical rates measured at the end of each trial,
+                    with shape `(num_trials,)`
+                - **"phi"** (`np_ndarray`): array of optimized phase shifts $\\boldsymbol{\\phi}$ for all training
+                    trials, with shape `(num_trials, L, m * (m - 1) // 2)`
+                - **"theta"** (`np_ndarray`) array of optimized phase shifts $\\boldsymbol{\\theta}$ for all training
+                    trials, with shape `(num_trials, L, m * (m - 1) // 2)`
+                - **"delta"** (`np_ndarray`) array of optimized phase shifts $\\boldsymbol{\\delta}$ for all training
+                    trials, with shape `(num_trials, L, m)`
+                - **"ell_mzi"** (`np_ndarray`) array of fractional losses per arm of each MZI in each QPNN trained in
+                    each trial, with shape `(num_trials, L, m, m)`
+                - **"ell_ps"** (`np_ndarray`) array of fractional losses per mesh output phase shifter in each QPNN
+                    trained in each trial, with shape `(num_trials, L, m)`
+                - **"t_dc"** (`np_ndarray`) array of directional coupler splitting ratios (T:R) throughout each QPNN
+                    trained in each trial, with shape `(num_trials, L, 2, m * (m - 1) // 2)`
         """
 
         # prepare the results dictionary
