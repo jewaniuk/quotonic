@@ -1,10 +1,19 @@
 """
-The `quotonic.training_sets` module includes ...
+The `quotonic.training_sets` module includes functions that are used to prepare training sets for quantum photonic
+neural network (QPNN) training simulations. Training sets can vary depending on the specific QPNN model used and the
+considered application. That being said, these functions typically return a set of input-target state pairs, where the
+QPNN should be trained to map each input state to its corresponding target state (see [qpnn](qpnn.md) and
+[trainer](trainer.md) for more details on network models and training, respectively). Depending on the specific task,
+these states may be resolved in a first-quantized basis, the second-quantized Fock basis, or the computational basis of
+the photonic qubits. As a result, the [fock](fock.md) and [logic](logic.md) modules are particularly useful in these
+functions.
+
+If you decide to use `quotonic` to perform research on QPNNs, feel free to develop a training set function to go with
+your QPNN model. Also, we'd be happy to add it if it fits the format appropriately, so please reach out!
 """
 
 from functools import reduce
 from itertools import combinations
-from typing import Tuple
 
 import numpy as np
 
@@ -14,14 +23,31 @@ from quotonic.types import np_ndarray
 from quotonic.utils import comp_indices_from_secq
 
 
-def CNOT() -> Tuple[np_ndarray, np_ndarray]:
+def CNOT() -> tuple[np_ndarray, np_ndarray]:
     """Construct training set for a dual-rail encoded QPNN-based CNOT gate, resolved in the second-quantized Fock basis.
 
-    ADD DOCUMENTATION HERE
+    See [logic](logic.md) for more details on CNOT gates from a logical standpoint. The truth table is as follows,
+    where a logical 0 (1) state is defined as $\\left|0\\right\\rangle_\\mathrm{log} \\equiv \\left|10\\right\\rangle$
+    ($\\left|1\\right\\rangle_\\mathrm{log} \\equiv \\left|01\\right\\rangle$) for the dual-rail encoding considered
+    here.
+
+    <table>
+      <thead>
+        <tr><th>$\\left|\\mathrm{in}\\right\\rangle$</th><th>$\\left|\\mathrm{targ}\\right\\rangle$</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>$\\left|1010\\right\\rangle$</td><td>$\\left|1010\\right\\rangle$</td></tr>
+        <tr><td>$\\left|1001\\right\\rangle$</td><td>$\\left|1001\\right\\rangle$</td></tr>
+        <tr><td>$\\left|0110\\right\\rangle$</td><td>$\\left|0101\\right\\rangle$</td></tr>
+        <tr><td>$\\left|0101\\right\\rangle$</td><td>$\\left|0110\\right\\rangle$</td></tr>
+      </tbody>
+    </table>
 
     Returns:
-        A tuple including two $K\\times N$ arrays, the first of which contains $K$ input states resolved in the
-            $N$-dimensional second quantization Fock basis, the second of which contains the corresponding target states
+        psi_in: $K\\times N$ array containing the $K$ input states resolved in the $N$-dimensional second quantization
+            Fock basis
+        psi_targ: $K\\times N$ array containing the $K$ target states resolved in the $N$-dimensional second
+            quantization Fock basis
     """
 
     # define number of photons, optical modes, and input-target state pairs,
@@ -53,14 +79,31 @@ def CNOT() -> Tuple[np_ndarray, np_ndarray]:
     return psi_in, psi_targ
 
 
-def CZ() -> Tuple[np_ndarray, np_ndarray]:
+def CZ() -> tuple[np_ndarray, np_ndarray]:
     """Construct training set for a dual-rail encoded QPNN-based CZ gate, resolved in the second-quantized Fock basis.
 
-    ADD DOCUMENTATION HERE
+    See [logic](logic.md) for more details on CZ gates from a logical standpoint. The truth table is as follows,
+    where a logical 0 (1) state is defined as $\\left|0\\right\\rangle_\\mathrm{log} \\equiv \\left|10\\right\\rangle$
+    ($\\left|1\\right\\rangle_\\mathrm{log} \\equiv \\left|01\\right\\rangle$) for the dual-rail encoding considered
+    here.
+
+    <table>
+      <thead>
+        <tr><th>$\\left|\\mathrm{in}\\right\\rangle$</th><th>$\\left|\\mathrm{targ}\\right\\rangle$</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>$\\left|1010\\right\\rangle$</td><td>$+\\left|1010\\right\\rangle$</td></tr>
+        <tr><td>$\\left|1001\\right\\rangle$</td><td>$+\\left|1001\\right\\rangle$</td></tr>
+        <tr><td>$\\left|0110\\right\\rangle$</td><td>$+\\left|0110\\right\\rangle$</td></tr>
+        <tr><td>$\\left|0101\\right\\rangle$</td><td>$-\\left|0101\\right\\rangle$</td></tr>
+      </tbody>
+    </table>
 
     Returns:
-        A tuple including two $K\\times N$ arrays, the first of which contains $K$ input states resolved in the
-            $N$-dimensional second quantization Fock basis, the second of which contains the corresponding target states
+        psi_in: $K\\times N$ array containing the $K$ input states resolved in the $N$-dimensional second quantization
+            Fock basis
+        psi_targ: $K\\times N$ array containing the $K$ target states resolved in the $N$-dimensional second
+            quantization Fock basis
     """
 
     # define number of photons, optical modes, and input-target state pairs,
@@ -92,15 +135,36 @@ def CZ() -> Tuple[np_ndarray, np_ndarray]:
     return psi_in, psi_targ
 
 
-def BSA() -> Tuple[np_ndarray, np_ndarray]:
+def BSA() -> tuple[np_ndarray, np_ndarray]:
     """Construct training set for a dual-rail encoded QPNN-based Bell State Analyzer, resolved in the
         second-quantized Fock basis.
 
-    ADD DOCUMENTATION HERE
+    See [logic](logic.md) for more details on BSA gates from a logical standpoint. The truth table is as follows,
+    where a logical 0 (1) state is defined as $\\left|0\\right\\rangle_\\mathrm{log} \\equiv \\left|10\\right\\rangle$
+    ($\\left|1\\right\\rangle_\\mathrm{log} \\equiv \\left|01\\right\\rangle$) for the dual-rail encoding considered
+    here.
+
+    <table>
+      <thead>
+        <tr><th>$\\left|\\mathrm{in}\\right\\rangle$</th><th>$\\left|\\mathrm{targ}\\right\\rangle$</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>$\\left|\\Phi^+\\right\\rangle \\equiv \\frac{1}{\\sqrt{2}}\\left(\\left|1010\\right\\rangle +
+        \\left|0101\\right\\rangle\\right)$</td><td>$\\left|1010\\right\\rangle$</td></tr>
+        <tr><td>$\\left|\\Phi^-\\right\\rangle \\equiv \\frac{1}{\\sqrt{2}}\\left(\\left|1010\\right\\rangle -
+        \\left|0101\\right\\rangle\\right)$</td><td>$\\left|0110\\right\\rangle$</td></tr>
+        <tr><td>$\\left|\\Psi^+\\right\\rangle \\equiv \\frac{1}{\\sqrt{2}}\\left(\\left|1001\\right\\rangle +
+        \\left|0110\\right\\rangle\\right)$</td><td>$\\left|1001\\right\\rangle$</td></tr>
+        <tr><td>$\\left|\\Psi^-\\right\\rangle \\equiv \\frac{1}{\\sqrt{2}}\\left(\\left|1001\\right\\rangle -
+        \\left|0110\\right\\rangle\\right)$</td><td>$\\left|0101\\right\\rangle$</td></tr>
+      </tbody>
+    </table>
 
     Returns:
-        A tuple including two $K\\times N$ arrays, the first of which contains $K$ input states resolved in the
-            $N$-dimensional second quantization Fock basis, the second of which contains the corresponding target states
+        psi_in: $K\\times N$ array containing the $K$ input states resolved in the $N$-dimensional second quantization
+            Fock basis
+        psi_targ: $K\\times N$ array containing the $K$ target states resolved in the $N$-dimensional second
+            quantization Fock basis
     """
 
     # define number of photons, optical modes, and input-target state pairs,
@@ -137,7 +201,7 @@ def BSA() -> Tuple[np_ndarray, np_ndarray]:
     return psi_in, psi_targ
 
 
-def Tree(b: int) -> tuple:  # noqa: C901
+def Tree(b: int) -> tuple[tuple, tuple, tuple]:  # noqa: C901
     """Construct the training set for a QPNN that powers a tree-type photonic cluster state generation protocol.
 
     ADD DOCUMENTATION HERE
@@ -222,4 +286,4 @@ def Tree(b: int) -> tuple:  # noqa: C901
         psi_in.append(psi_in_n)
         psi_targ.append(psi_targ_n)
         comp_indices.append(build_comp_indices_for_n(_n))
-    return psi_in, psi_targ, comp_indices
+    return tuple(psi_in), tuple(psi_targ), tuple(comp_indices)
