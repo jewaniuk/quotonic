@@ -1,3 +1,16 @@
+:root {
+    --md-accent-fg-color:         #FD416D;
+}
+
+[data-md-color-scheme="slate"] {
+    --md-default-bg-color:        #14151A;
+    --md-accent-fg-color:         #FD416D;
+}
+
+.md-typeset a {
+  color: #6F73D2;
+}
+
 /* --- Scroll-tracking active item (sidebar) --- */
 .md-nav__link--active {
   color: var(--md-accent-fg-color) !important;
