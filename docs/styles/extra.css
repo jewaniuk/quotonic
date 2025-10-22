@@ -1,14 +1,22 @@
 :root {
     --md-accent-fg-color:         #FD416D;
+    --md-table-header-bg-color:   #F5F5F5;
+    --md-link-color:              #6F73D2;
 }
 
 [data-md-color-scheme="slate"] {
     --md-default-bg-color:        #14151A;
-    --md-accent-fg-color:         #FD416D;
+    --md-accent-fg-color:         #F486F3;
+    --md-table-header-bg-color:   #222327;
+    --md-link-color:              #FD416D;
 }
 
 .md-typeset a {
-  color: #6F73D2;
+  color: var(--md-link-color);
+}
+
+.md-typeset table thead tr {
+  background-color: var(--md-table-header-bg-color) !important;
 }
 
 /* --- Scroll-tracking active item (sidebar) --- */
