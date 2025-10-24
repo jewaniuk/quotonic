@@ -50,9 +50,9 @@ jobs:
       - name: create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
-          name: Release ${{ env.VERSION }}
+          tag_name: ${{ github.event.inputs.version }}
+          name: quotonic ${{ github.event.inputs.version }}
           body: |
-            This release corresponds to version ${{ env.VERSION }} on PyPI.
+            This release corresponds to ${{ github.event.inputs.version }} on PyPI.
             See documentation for this version at:
-            https://jewaniuk.github.io/quotonic/${{ env.VERSION }}/
+            https://jewaniuk.github.io/quotonic/${{ github.event.inputs.version }}/
