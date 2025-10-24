@@ -19,6 +19,16 @@
   background-color: var(--md-table-header-bg-color) !important;
 }
 
+/* Hide dark-mode images in light mode */
+[data-md-color-scheme="default"] .only-dark {
+  display: none !important;
+}
+
+/* Hide light-mode images in dark mode */
+[data-md-color-scheme="slate"] .only-light {
+  display: none !important;
+}
+
 /* --- Scroll-tracking active item (sidebar) --- */
 .md-nav__link--active {
   color: var(--md-accent-fg-color) !important;
