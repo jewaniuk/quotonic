@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version tag to release (e.g. v1.2.3)"
+        description: "version to release (e.g. 1.2.3)"
         required: true
         type: string
 
@@ -19,7 +19,7 @@ jobs:
       - name: checkout quotonic
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # needed so 'mike' can access history
+          fetch-depth: 0
 
       - name: prepare python 3.10
         uses: actions/setup-python@v5
@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          version=${{ github.event.inputs.version }}
+          version=v${{ github.event.inputs.version }}
           mike deploy $version latest --push --update-aliases
 
       - name: create GitHub release
@@ -53,6 +53,6 @@ jobs:
           tag_name: ${{ github.event.inputs.version }}
           name: quotonic ${{ github.event.inputs.version }}
           body: |
-            This release corresponds to ${{ github.event.inputs.version }} on PyPI.
-            See documentation for this version at:
-            https://jewaniuk.github.io/quotonic/${{ github.event.inputs.version }}/
+            This release corresponds to version ${{ github.event.inputs.version }} on PyPI.
+            See documentation for this version at
+            https://jewaniuk.github.io/quotonic/v${{ github.event.inputs.version }}/.
