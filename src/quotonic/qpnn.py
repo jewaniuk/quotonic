@@ -24,8 +24,8 @@ consecutive layers. These elements are key to network operation as they provide 
 neural network and allow it to realize near-deterministic entangling operations.
 
 <p align="center">
-<img width="800" src="..img/light/qpnn.png" class="only-light">
-<img width="800" src="..img/dark/qpnn.png" class="only-dark">
+<img width="800" src="../img/light/qpnn.png" class="only-light">
+<img width="800" src="../img/dark/qpnn.png" class="only-dark">
 </p>
 
 By simply piecing all the sections of the network together, a QPNN can be described by the transfer function,
