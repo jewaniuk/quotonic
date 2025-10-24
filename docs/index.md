@@ -12,6 +12,7 @@ When it comes to simulating quantum dynamics using classical computational resou
 consider performance. Here, we write circuit models to be compatible with [`jax`](https://github.com/jax-ml/jax) and
 thus owe a massive thank you to the developers at [Google DeepMind](https://deepmind.google/). It is also necessary to
 mention and thank similar packages, each of which have inspired some of the code within `quotonic`.
+
 - [Bosonic: A Quantum Optics Library](https://github.com/steinbrecher/bosonic)
 - [Cascaded Optical Systems Approach to Neural Networks (CasOptAx)](https://github.com/JasvithBasani/CasOptAx)
 - [Piquasso](https://github.com/Budapest-Quantum-Computing-Group/piquasso)
