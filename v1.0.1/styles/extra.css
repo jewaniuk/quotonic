@@ -1,0 +1,56 @@
+:root {
+    --md-accent-fg-color:         #FD416D;
+    --md-table-header-bg-color:   #F5F5F5;
+    --md-link-color:              #6F73D2;
+}
+
+[data-md-color-scheme="slate"] {
+    --md-default-bg-color:        #14151A;
+    --md-accent-fg-color:         #F486F3;
+    --md-table-header-bg-color:   #222327;
+    --md-link-color:              #FD416D;
+}
+
+.md-typeset a {
+  color: var(--md-link-color);
+}
+
+.md-typeset table thead tr {
+  background-color: var(--md-table-header-bg-color) !important;
+}
+
+/* Hide dark-mode images in light mode */
+[data-md-color-scheme="default"] .only-dark {
+  display: none !important;
+}
+
+/* Hide light-mode images in dark mode */
+[data-md-color-scheme="slate"] .only-light {
+  display: none !important;
+}
+
+/* --- Scroll-tracking active item (sidebar) --- */
+.md-nav__link--active {
+  color: var(--md-accent-fg-color) !important;
+}
+
+/* Make the top-right header items align right */
+.md-header__inner {
+  display: flex;
+  align-items: center;
+}
+
+/* Set explicit order: GitHub first, palette toggle second */
+.md-header__source {
+  order: 1;
+}
+
+.md-header__option {
+  order: 2;
+}
+
+/* Add a small gap between them */
+.md-header__option > * + *,
+.md-header__source > * + * {
+  margin-left: -2rem;
+}
