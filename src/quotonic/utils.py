@@ -1,5 +1,5 @@
 """
-The `quotonic.utils` module includes ...
+The `quotonic.utils` module includes miscellaneous helper functions for a variety of other modules within `quotonic`.
 """
 
 import numpy as np
@@ -33,7 +33,10 @@ def genHaarUnitary(m: int) -> np_ndarray:
 def comp_to_secq(comp_state: np_ndarray) -> np_ndarray:
     """Convert a computational basis state to its corresponding second-quantized Fock basis state in dual-rail encoding.
 
-    ADD DOCUMENTATION HERE
+    In dual-rail encoding, a qubit is defined by the location of a single photon in two consecutive optical modes.
+    Mathematically, this can be written as $\\left|0\\right\\rangle_\\mathrm{log} \\equiv \\left|10\\right\\rangle$ and
+    $\\left|1\\right\\rangle_\\mathrm{log} \\equiv \\left|01\\right\\rangle$. This function takes a computational basis
+    state, iterates through each qubit, and inserts the corresponding representation in the second-quantized Fock basis.
 
     Args:
         comp_state: $n$-length array, where $n$ is the number of qubits, where each element specifies whether a qubit
@@ -42,6 +45,14 @@ def comp_to_secq(comp_state: np_ndarray) -> np_ndarray:
     Returns:
         Fock basis state that corresponds to the given computational basis state by dual-rail encoding, a $2n$-length
         array
+
+    Examples:
+        ```
+        >>> comp_to_secq(np.array([0]))
+        array([1, 0])
+        >>> comp_to_secq(np.array([0, 1]))
+        array([1, 0, 0, 1])
+        ```
     """
 
     # check the validity of the provided computational basis state
@@ -60,7 +71,10 @@ def comp_to_secq(comp_state: np_ndarray) -> np_ndarray:
 def secq_to_comp(fock_state: np_ndarray) -> np_ndarray:
     """Convert a Fock basis state, that is dual-rail encoded, to its corresponding computational basis state.
 
-    ADD DOCUMENTATION HERE
+    In dual-rail encoding, a qubit is defined by the location of a single photon in two consecutive optical modes.
+    Mathematically, this can be written as $\\left|0\\right\\rangle_\\mathrm{log} \\equiv \\left|10\\right\\rangle$ and
+    $\\left|1\\right\\rangle_\\mathrm{log} \\equiv \\left|01\\right\\rangle$. This function takes a second-quantized
+    Fock basis state, iterates through each qubit, and inserts the corresponding 0 or 1 from the computational basis.
 
     Args:
         fock_state: $2n$-length array, where $n$ is the number of qubits, where each consecutive pair of elements
@@ -69,6 +83,14 @@ def secq_to_comp(fock_state: np_ndarray) -> np_ndarray:
     Returns:
         Computational basis state that corresponds to the given Fock basis state by dual-rail encoding, an
             $n$-length array
+
+    Examples:
+        ```
+        >>> secq_to_comp(np.array([1, 0]))
+        array([0])
+        >>> secq_to_comp(np.array([1, 0, 0, 1]))
+        array([0, 1])
+        ```
     """
 
     # check the validity of the provided symmetric Fock basis state
@@ -88,7 +110,10 @@ def secq_to_comp(fock_state: np_ndarray) -> np_ndarray:
 def comp_indices_from_secq(fock_basis: np_ndarray, ancillary_modes: np_ndarray | None = None) -> np_ndarray:
     """Extract the indices of Fock basis states that correspond to computational basis states by dual-rail encoding.
 
-    ADD DOCUMENTATION HERE
+    This function iterates through each second-quantized Fock basis states, ignores the specified ancillary modes if
+    provided (these are not involved with logical encoding), checks if the state corresponds to the dual-rail encoding,
+    and stores the index of this state within the Fock basis if it is deemed logical. The list of indices is returned
+    as an array.
 
     Args:
         fock_basis: $N\\times 2n$ array, where $n$ is the number of qubits, that catalogs all states in the
@@ -99,6 +124,27 @@ def comp_indices_from_secq(fock_basis: np_ndarray, ancillary_modes: np_ndarray |
     Returns:
         $2^n$-length array whose elements are the indices of the second quantization Fock basis where dual-rail encoded
             computational basis states lie
+
+    Examples:
+        ```
+        >>> from quotonic.fock import build_secq_basis
+        >>> n = 2
+        >>> m = 4
+        >>> fock_basis = build_secq_basis(n, m)
+        >>> fock_basis
+        array([[2, 0, 0, 0],
+               [1, 1, 0, 0],
+               [1, 0, 1, 0],
+               [1, 0, 0, 1],
+               [0, 2, 0, 0],
+               [0, 1, 1, 0],
+               [0, 1, 0, 1],
+               [0, 0, 2, 0],
+               [0, 0, 1, 1],
+               [0, 0, 0, 2]])
+        >>> comp_indices_from_secq(fock_basis)
+        array([2, 3, 5, 6])
+        ```
     """
 
     # check the validity of the provided Fock basis
