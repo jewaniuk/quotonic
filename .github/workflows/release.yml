@@ -35,14 +35,13 @@ jobs:
         run: python -m build
 
       - name: publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v2
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          attestations: true
 
       - name: deploy versioned docs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           version=${{ github.event.inputs.version }}
-          mike deploy --push --update-aliases $version latest
+          mike deploy $version --push --update-aliases latest --force
