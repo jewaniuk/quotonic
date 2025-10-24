@@ -1,12 +1,12 @@
 site_name: quotonic
 repo_url: https://github.com/jewaniuk/quotonic
-site_url: ""
+site_url: "https://jewaniuk.github.io/quotonic"
 site_description: A platform for performing efficient simulations of nonlinear quantum photonic circuits.
 site_author: Jacob Ewaniuk
 edit_uri: edit/main/docs/
 repo_name: jewaniuk/quotonic
 copyright: Maintained by <a href="https://www.linkedin.com/in/jacobewaniuk/">Jacob Ewaniuk</a>.
-use_directory_urls: false
+use_directory_urls: true
 
 nav:
   - fock: fock.md

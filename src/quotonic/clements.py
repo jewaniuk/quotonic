@@ -165,8 +165,8 @@ class Mesh:
         $t_2$ (ideally, $t_1 = t_2 = 0.5$).
 
         <p align="center">
-        <img width="500" src="img/light/mzi.png" class="only-light">
-        <img width="500" src="img/dark/mzi.png" class="only-dark">
+        <img width="500" src="../img/light/mzi.png" class="only-light">
+        <img width="500" src="../img/dark/mzi.png" class="only-dark">
         </p>
 
         The phase shifter transfer matrices are given by,
@@ -231,8 +231,8 @@ class Mesh:
         generated. This is displayed below, where each cross is a MZI.
 
         <p align="center">
-        <img width="500" src="img/light/mesh.png" class="only-light">
-        <img width="500" src="img/dark/mesh.png" class="only-dark">
+        <img width="500" src="../img/light/mesh.png" class="only-light">
+        <img width="500" src="../img/dark/mesh.png" class="only-dark">
         </p>
 
         Mathematically, this procedure takes the form,

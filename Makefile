@@ -18,6 +18,8 @@ docs-test: ## Test if documentation can be built without warnings or errors
 .PHONY: docs-gh
 docs-gh: ## Build documentation for GitHub Pages
 	@mike deploy --push --update-aliases latest
+	@mike set-default latest
+	@mike serve
 
 .PHONY: check
 check: ## Run code quality tools
