@@ -1,6 +1,6 @@
 [project]
 name = 'quotonic'
-version = '1.0.0'
+version = '1.0.1'
 requires-python = '>=3.10,<4.0'
 description = 'A platform for performing efficient simulations of nonlinear quantum photonic circuits.'
 authors = [
