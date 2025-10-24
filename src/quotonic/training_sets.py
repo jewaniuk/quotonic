@@ -204,15 +204,89 @@ def BSA() -> tuple[np_ndarray, np_ndarray]:
 def Tree(b: int) -> tuple[tuple, tuple, tuple]:  # noqa: C901
     """Construct the training set for a QPNN that powers a tree-type photonic cluster state generation protocol.
 
-    ADD DOCUMENTATION HERE
+    In short, to power the tree-type photonic cluster state generation protocol, the QPNN should be trained to
+    perform CZ gate operations between the control photon in the first qubit slot (always initialized as
+    $\\left|+\\right\rangle$) and all target photons that simultaneously enter the other qubit slots. If the
+    control photon enters alone, it should be routed through the network unchanged (i.e. an identity operation). For
+    more details on this set of operations, as well as the tree generation protocol in general, please see [qpnn](
+    qpnn.md) as well as [J. Ewaniuk *et al*., "Large-Scale Tree-Type Photonic Cluster State Generation with Recurrent
+    Quantum Photonic Neural Networks", arXiv:2505.14628 [quant-ph]](https://doi.org/10.48550/arXiv.2505.14628).
+
+    Unfortunately, there are many unit cell operations required for each given $b$, and the format of these
+    operations changes in a complex way as $b$ increases. Thus, it is difficult to describe the output of this
+    function for any general $b$. That being said, we provide an example output below for $b = 2$, with the training
+    set shown using a truth table resolved in the computational basis, followed by the form of `comp_indices`.
+
+    <table>
+      <thead>
+        <tr><th>$\\left|\\mathrm{in}\\right\\rangle$</th><th>$\\left|\\mathrm{targ}\\right\\rangle$</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>$\\left|+\\right\\rangle$</td><td>$\\left|+\\right\\rangle$</td></tr>
+        <tr><td>$\\left|++\\right\\rangle$</td><td>$\\frac{1}{2}\\left(\\left|00\\right\\rangle +
+        \\left|01\\right\\rangle + \\left|10\\right\\rangle - \\left|11\\right\\rangle\\right)$</td></tr>
+        <tr><td>$\\left|+-\\right\\rangle$</td><td>$\\frac{1}{2}\\left(\\left|00\\right\\rangle -
+        \\left|01\\right\\rangle + \\left|10\\right\\rangle + \\left|11\\right\\rangle\\right)$</td></tr>
+        <tr><td>$\\left|+0\\right\\rangle$</td><td>$\\left|+0\\right\\rangle$</td></tr>
+        <tr><td>$\\left|+1\\right\\rangle$</td><td>$\\left|-1\\right\\rangle$</td></tr>
+        <tr><td>$\\left|+++\\right\\rangle$</td><td>$\\frac{1}{2\\sqrt{2}}\\left(\\left|000\\right\\rangle +
+        \\left|001\\right\\rangle + \\left|010\\right\\rangle + \\left|011\\right\\rangle + \\left|100\\right\\rangle
+        - \\left|101\\right\\rangle - \\left|110\\right\\rangle + \\left|111\\right\\rangle\\right)$</td></tr>
+        <tr><td>$\\left|++-\\right\\rangle$</td><td>$\\frac{1}{2\\sqrt{2}}\\left(\\left|000\\right\\rangle -
+        \\left|001\\right\\rangle + \\left|010\\right\\rangle - \\left|011\\right\\rangle + \\left|100\\right\\rangle
+        + \\left|101\\right\\rangle - \\left|110\\right\\rangle - \\left|111\\right\\rangle\\right)$</td></tr>
+        <tr><td>$\\left|+-+\\right\\rangle$</td><td>$\\frac{1}{2\\sqrt{2}}\\left(\\left|000\\right\\rangle +
+        \\left|001\\right\\rangle - \\left|010\\right\\rangle - \\left|011\\right\\rangle + \\left|100\\right\\rangle
+        - \\left|101\\right\\rangle + \\left|110\\right\\rangle - \\left|111\\right\\rangle\\right)$</td></tr>
+        <tr><td>$\\left|+--\\right\\rangle$</td><td>$\\frac{1}{2\\sqrt{2}}\\left(\\left|000\\right\\rangle -
+        \\left|001\\right\\rangle - \\left|010\\right\\rangle + \\left|011\\right\\rangle + \\left|100\\right\\rangle
+        + \\left|101\\right\\rangle + \\left|110\\right\\rangle + \\left|111\\right\\rangle\\right)$</td></tr>
+        <tr><td>$\\left|+00\\right\\rangle$</td><td>$\\left|+00\\right\\rangle$</td></tr>
+        <tr><td>$\\left|+01\\right\\rangle$</td><td>$\\left|-01\\right\\rangle$</td></tr>
+        <tr><td>$\\left|+10\\right\\rangle$</td><td>$\\left|-10\\right\\rangle$</td></tr>
+        <tr><td>$\\left|+11\\right\\rangle$</td><td>$\\left|+11\\right\\rangle$</td></tr>
+      </tbody>
+    </table>
+
+    ```
+    >>> b = 2
+    >>> psi_in, psi_targ, comp_indices = Tree(b)
+    >>> len(psi_in)
+    3
+    >>> psi_in[0].shape
+    (1, 2)
+    >>> psi_in[1].shape
+    (4, 4)
+    >>> psi_in[2].shape
+    (8, 8)
+    >>> len(comp_indices)
+    3
+    >>> comp_indices[0]
+    array([0, 1])
+    >>> comp_indices[1]
+    array([[ 4, 5, 9, 10],
+           [ 2, 3, 7, 8]])
+    >>> comp_indices[2]
+    array([[13, 14, 16, 17, 28, 29, 31, 32]])
+    ```
+
+    Above, we find that the `psi_in` (and correspondingly `psi_targ`) tuple contains 3 elements, for $n = 1, 2,
+    3$ respectively. At $n = 1$, the computational basis has dimension 2, and there is one input-target pair to train
+    on. At $n = 2$ ($n = 3$) the dimension is 4 (8) and there are 4 (8) input-target pairs to train on. The
+    `comp_indices` tuple also contains 3 elements organized in the same way, yet as we look at the arrays that make
+    up each element, we find that for $n = 2$ there are two unit cell operations that must be learnt,
+    each corresponding to a photon missing in a different qubit slot which changes the relevant logical states within
+    the second-quantized Fock basis. This is the form taken for any $b$. The tuple is arranged according to photon
+    number, yet there may be more than one unit cell operation for a given $n$.
 
     Args:
-        b: maximum number of branches in the tree, $\\max\\left\\{\\vec{b}\\}$
+        b: maximum number of branches in the tree, $b$
 
     Returns:
-        Tuple of three tuples, the first two of which are the input and target states resolved in the computational
-            basis for each $1 \\leq n \\leq b + 1$, the last of which contains the computational basis indices for each
-            unit cell operation that exists for each $n$
+        psi_in: input states resolved in the computational basis for each $1 \\leq n \\leq b + 1$
+        psi_targ: target states resolved in the computational basis for each $1 \\leq n \\leq b + 1$
+        comp_indices: indices within the relevant second-quantized Fock basis that correspond to computational basis
+            states, for each unit cell operation that exists for each $1 \\leq n \\leq b + 1$
     """
 
     # define the number of photons and number of optical modes
