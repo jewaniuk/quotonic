@@ -46,3 +46,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           version=${{ github.event.inputs.version }}
           mike deploy $version latest --push --update-aliases
+
+      - name: create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          body: |
+            This release corresponds to version ${{ env.VERSION }} on PyPI.
+            See documentation for this version at:
+            https://jewaniuk.github.io/quotonic/${{ env.VERSION }}/
