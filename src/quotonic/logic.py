@@ -25,7 +25,7 @@ def build_comp_basis(n: int) -> np_ndarray:
         $N\\times n$ array that catalogs all states in the $N$-dimensional computational basis
 
     Examples:
-        ```
+        ```python
         >>> build_comp_basis(1)
         array([[0],
                [1]])
@@ -73,7 +73,7 @@ def H(n: int = 1) -> np_ndarray:
         Matrix representation of a Hadamard gate, as a $2\\times 2 array
 
     Examples:
-        ```
+        ```python
         >>> H()
         array([[ 0.70710678+0.j,  0.70710678+0.j],
                [ 0.70710678+0.j, -0.70710678+0.j]])
@@ -107,7 +107,7 @@ def CNOT(control: int = 0, target: int = 1, n: int = 2) -> np_ndarray:
         Matrix representation of a CNOT gate between the control and target qubits, as a $2^n\\times 2^n$ array
 
     Examples:
-        ```
+        ```python
         >>> CNOT()
         array([[1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                [0.+0.j, 1.+0.j, 0.+0.j, 0.+0.j],
@@ -175,7 +175,7 @@ def CZ(control: int = 0, target: int = 1, n: int = 2) -> np_ndarray:
         Matrix representation of a CZ gate between the control and target qubits, as a $2^n\\times 2^n$ array
 
     Examples:
-        ```
+        ```python
         >>> CZ()
         array([[ 1.+0.j,  0.+0.j,  0.+0.j,  0.+0.j],
                [ 0.+0.j,  1.+0.j,  0.+0.j,  0.+0.j],

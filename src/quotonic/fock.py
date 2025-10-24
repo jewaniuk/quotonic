@@ -88,7 +88,7 @@ def build_firq_basis(n: int, m: int) -> np_ndarray:
     The states are computed from all combinations of the available optical modes, then converted to an array. An
     example result is displayed below for $n = 2$ photons and $m = 4$ optical modes:
 
-    ```
+    ```python
     [[0, 0], [0, 1], [0, 2], [0, 3], [1, 0], [1, 1], [1, 2], [1, 3], [2, 0], [2, 1],
     [2, 2], [2, 3], [3, 0], [3, 1], [3, 2], [3, 3]]
     ```
@@ -124,7 +124,7 @@ def build_firq_basis_wo_dups(n: int, m: int) -> np_ndarray:
     then converts them to an array. With the duplicates removed, the dimension of this basis is the same as the
     second-quantized Fock basis. An example result is displayed below for $n = 2$ photons and $m = 4$ optical modes:
 
-    ```
+    ```python
     [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [1, 3], [2, 2], [2, 3], [3, 3]]
     ```
 
@@ -159,7 +159,7 @@ def build_secq_basis(n: int, m: int) -> np_ndarray:
     and creating a list of those counts. Each of these lists corresponding to Fock basis states are appended to the
     full `fock_basis` 2D array. Example results are displayed below for $n = 2$ photons and $m = 4$ optical modes:
 
-    ```
+    ```python
     >>> firq_basis
     [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [1, 3], [2, 2], [2, 3], [3, 3]]
 

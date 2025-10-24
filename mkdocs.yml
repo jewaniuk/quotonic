@@ -34,6 +34,7 @@ plugins:
             extra:
               show_object_full_path: true
               show_module_path: true
+  - mike
 theme:
   name: material
   feature:
@@ -63,19 +64,27 @@ theme:
         name: Switch to light mode
   icon:
     repo: fontawesome/brands/github
+  highlightjs: true
 
 extra:
+  version:
+    provider: mike
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/jewaniuk/quotonic
     - icon: fontawesome/brands/python
-      link: https://pypi.com/project/quotonic
+      link: https://pypi.org/project/quotonic
 
 markdown_extensions:
   - toc:
       permalink: true
   - pymdownx.arithmatex:
       generic: true
+  - admonition
+  - codehilite
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
 
 extra_javascript:
   - js/katex.js
@@ -85,7 +94,3 @@ extra_javascript:
 extra_css:
   - https://unpkg.com/katex@0/dist/katex.min.css
   - styles/extra.css
-
-#extra_javascript:
-#  - https://polyfill.io/v3/polyfill.min.js?features=es6
-#  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

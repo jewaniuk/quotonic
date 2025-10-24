@@ -8,8 +8,8 @@ When training a QPNN, the goal is to minimize the network cost function by adjus
 parameters throughout the network architecture. Since most functionalities in `quotonic` are written for use with
 `jax`, we naturally turn to the version of `autograd` native to jax for gradient computation, and manage optimization
 trials using `optax`. Currently, we typically apply the default [Adam optimizer](https://arxiv.org/abs/1412.6980) and
-exponential decay scheduler from `optax`, as inspired by [Cascaded Optical Systems Approach to Neural Networks (
-CasOptAx)]( https://github.com/JasvithBasani/CasOptAx) as originally designed for use in [J. R. Basani *et al*.,
+exponential decay scheduler from `optax`, as inspired by [Cascaded Optical Systems Approach to Neural Networks
+(CasOptAx)]( https://github.com/JasvithBasani/CasOptAx) as originally designed for use in [J. R. Basani *et al*.,
 "Universal logical quantum photonic neural network processor via cavity-assisted interactions", *npj Quantum Inf*
 **11**, 142 (2025)](https://doi.org/10.1038/s41534-025-01096-9).
 

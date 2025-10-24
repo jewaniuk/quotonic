@@ -47,7 +47,7 @@ def comp_to_secq(comp_state: np_ndarray) -> np_ndarray:
         array
 
     Examples:
-        ```
+        ```python
         >>> comp_to_secq(np.array([0]))
         array([1, 0])
         >>> comp_to_secq(np.array([0, 1]))
@@ -85,7 +85,7 @@ def secq_to_comp(fock_state: np_ndarray) -> np_ndarray:
             $n$-length array
 
     Examples:
-        ```
+        ```python
         >>> secq_to_comp(np.array([1, 0]))
         array([0])
         >>> secq_to_comp(np.array([1, 0, 0, 1]))
@@ -126,7 +126,7 @@ def comp_indices_from_secq(fock_basis: np_ndarray, ancillary_modes: np_ndarray |
             computational basis states lie
 
     Examples:
-        ```
+        ```python
         >>> from quotonic.fock import build_secq_basis
         >>> n = 2
         >>> m = 4

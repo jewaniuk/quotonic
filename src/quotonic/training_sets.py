@@ -206,7 +206,7 @@ def Tree(b: int) -> tuple[tuple, tuple, tuple]:  # noqa: C901
 
     In short, to power the tree-type photonic cluster state generation protocol, the QPNN should be trained to
     perform CZ gate operations between the control photon in the first qubit slot (always initialized as
-    $\\left|+\\right\rangle$) and all target photons that simultaneously enter the other qubit slots. If the
+    $\\left|+\\right\\rangle$) and all target photons that simultaneously enter the other qubit slots. If the
     control photon enters alone, it should be routed through the network unchanged (i.e. an identity operation). For
     more details on this set of operations, as well as the tree generation protocol in general, please see [qpnn](
     qpnn.md) as well as [J. Ewaniuk *et al*., "Large-Scale Tree-Type Photonic Cluster State Generation with Recurrent
@@ -248,7 +248,7 @@ def Tree(b: int) -> tuple[tuple, tuple, tuple]:  # noqa: C901
       </tbody>
     </table>
 
-    ```
+    ```python
     >>> b = 2
     >>> psi_in, psi_targ, comp_indices = Tree(b)
     >>> len(psi_in)
